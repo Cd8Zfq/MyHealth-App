@@ -24,7 +24,7 @@
 
 1.  **Cloner le dépôt**
     ```bash
-    git clone https://github.com/votre-username/MyHealth.git
+    git clone https://github.com/Cd8Zfq/MyHealth-App.git
     cd MyHealth
     ```
 
