@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Historique Patient{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto p-6">
+    <div class="flex items-center space-x-4 mb-8">
+        <a href="{{ url_for('main.patients') }}" class="text-slate-400 hover:text-slate-600">← Retour</a>
+        <h2 class="text-2xl font-semibold text-medical-text">Historique de {{ patient.email }}</h2>
+    </div>
+
+    <div class="grid gap-3">
+        {% for m in measurements %}
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex justify-between items-center">
+            <div class="flex items-center space-x-4">
+                <div class="text-lg">{% if m.type == 'tension' %}🫀{% elif m.type == 'glycemie' %}🩸{% else %}⚖️{% endif %}</div>
+                <div>
+                    <span class="font-bold text-slate-800">{{ m.value1 }}{% if m.value2 %}/{{ m.value2 }}{% endif %}</span>
+                    <span class="text-xs text-slate-400">{{ m.unit }}</span>
+                    <p class="text-xs text-slate-400">{{ m.date.strftime('%d/%m/%Y %H:%M') }}</p>
+                </div>
+            </div>
+            <span class="text-xs font-semibold px-2 py-1 rounded {{ m.status_color|replace('text-', 'bg-')|replace('-600', '-100')|replace('-500', '-100') }} {{ m.status_color }}">
+                {{ m.type }}
+            </span>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

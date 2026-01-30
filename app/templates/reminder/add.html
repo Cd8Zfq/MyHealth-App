@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Nouveau rappel{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto">
+    <div class="flex items-center gap-4 mb-8">
+        <a href="{{ url_for('main.reminders') }}" class="p-2 rounded-lg hover:bg-gray-100 text-gray-500 transition active:scale-95">
+            <i data-lucide="arrow-left" class="w-5 h-5"></i>
+        </a>
+        <h1 class="text-2xl font-extrabold text-gray-900">Nouveau rappel</h1>
+    </div>
+
+    <form method="POST" action="" class="space-y-6">
+        {{ form.hidden_tag() }}
+        
+        <div class="bg-white p-6 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] space-y-6">
+            <div class="space-y-2">
+                <label class="block text-sm font-bold text-gray-700 ml-1">Titre du rappel</label>
+                {{ form.title(class="block w-full rounded-2xl border-gray-100 bg-gray-50 py-4 px-5 text-gray-900 font-bold focus:border-blue-500 focus:ring-blue-500 transition-all", placeholder="ex: Vitamine D, Médicament...") }}
+            </div>
+
+            <div class="space-y-2">
+                <label class="block text-sm font-bold text-gray-700 ml-1">Heure</label>
+                {{ form.time(class="block w-full rounded-2xl border-gray-100 bg-gray-50 py-4 px-5 text-gray-900 font-bold focus:border-blue-500 focus:ring-blue-500 transition-all", placeholder="08:00") }}
+            </div>
+
+            <div class="space-y-2">
+                <label class="block text-sm font-bold text-gray-700 ml-1">Jours (Optionnel)</label>
+                {{ form.days(class="block w-full rounded-2xl border-gray-100 bg-gray-50 py-4 px-5 text-gray-900 font-bold focus:border-blue-500 focus:ring-blue-500 transition-all", placeholder="Lun, Mar, Ven...") }}
+            </div>
+        </div>
+
+        <button type="submit" class="w-full bg-blue-600 text-white font-extrabold rounded-[1.5rem] py-5 shadow-lg shadow-blue-200 hover:bg-blue-700 transition active:scale-[0.98]">
+            Enregistrer le rappel
+        </button>
+        
+        <div class="text-center">
+            <a href="{{ url_for('main.reminders') }}" class="text-sm font-bold text-gray-400 hover:text-gray-600 transition">
+                Annuler
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

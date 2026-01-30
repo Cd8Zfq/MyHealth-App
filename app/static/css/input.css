@@ -1,0 +1,24 @@
+@import "tailwindcss";
+@source "../../templates/**/*.html";
+@source "../../**/*.py";
+@source "../**/*.js";
+
+@theme {
+  --font-sans: 'Nunito', sans-serif;
+  
+  --color-primary: #2563EB;
+  --color-success: #16A34A;
+  --color-warning: #F59E0B;
+  --color-danger: #DC2626;
+  --color-mainText: #1F2937;
+  --color-mutedText: #6B7280;
+  --color-bg-page: #FFF9F0;
+
+  --radius-3xl: 1.5rem; 
+  --shadow-soft: 0 8px 30px rgb(0 0 0 / 0.04);
+}
+
+/* Custom Utilities */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 20px);
+}

@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}Ajouter une mesure{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    
+    <div class="text-center pb-4 pt-2">
+        <h1 class="text-xl font-bold text-slate-900">Type de saisie</h1>
+        <p class="text-sm text-slate-500">Comment souhaitez-vous ajouter cette mesure ?</p>
+    </div>
+
+    <div class="grid gap-4">
+        <!-- Manual Entry -->
+        <a href="{{ url_for('main.add_measurement') }}" class="group bg-white rounded-xl p-6 border border-slate-200 shadow-sm hover:border-blue-300 hover:shadow-md transition duration-200 flex items-center justify-between active:scale-[0.98]">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-full bg-blue-50 text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors">
+                    <i data-lucide="edit-3" class="w-6 h-6"></i>
+                </div>
+                <div class="text-left">
+                    <h3 class="text-base font-bold text-slate-900">Saisie Manuelle</h3>
+                    <p class="text-xs text-slate-500 mt-1">Via clavier</p>
+                </div>
+            </div>
+            <i data-lucide="chevron-right" class="w-5 h-5 text-slate-300 group-hover:text-primary transition"></i>
+        </a>
+
+        <!-- Connected Device -->
+        <button onclick="alert('Module Bluetooth en cours de développement.')" class="w-full group bg-white rounded-xl p-6 border border-slate-200 shadow-sm hover:border-blue-300 hover:shadow-md transition duration-200 flex items-center justify-between text-left active:scale-[0.98]">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-full bg-slate-50 text-slate-600 flex items-center justify-center group-hover:bg-slate-800 group-hover:text-white transition-colors">
+                    <i data-lucide="bluetooth" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h3 class="text-base font-bold text-slate-900">Capteur Connecté</h3>
+                    <p class="text-xs text-slate-500 mt-1">Synchro automatique</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="text-[10px] font-bold bg-slate-100 text-slate-500 px-2 py-1 rounded-md">Bientôt</span>
+                <i data-lucide="chevron-right" class="w-5 h-5 text-slate-300"></i>
+            </div>
+        </button>
+    </div>
+    
+    <div class="pt-8 text-center">
+        <a href="{{ url_for('main.home') }}" class="text-sm font-medium text-slate-500 hover:text-primary transition">
+            Annuler
+        </a>
+    </div>
+
+</div>
+{% endblock %}

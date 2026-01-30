@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Mes rappels{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    <div class="flex justify-between items-center px-2">
+        <div>
+            <h2 class="text-3xl font-extrabold text-gray-900">Rappels</h2>
+            <p class="text-gray-500 font-bold">Gérez vos prises de médicaments</p>
+        </div>
+        <a href="{{ url_for('main.add_reminder') }}" class="bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-2xl shadow-lg shadow-blue-200 transition active:scale-95">
+            <i data-lucide="plus" class="w-6 h-6 stroke-[3]"></i>
+        </a>
+    </div>
+
+    <div class="grid gap-4">
+        {% for reminder in reminders %}
+        <div class="bg-white p-6 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex justify-between items-center transition-all border border-transparent hover:border-blue-50 {% if not reminder.is_active %}opacity-60 grayscale{% endif %}">
+            <div class="flex items-center space-x-5">
+                <div class="w-14 h-14 bg-orange-50 text-orange-500 rounded-2xl flex items-center justify-center shadow-sm">
+                    <i data-lucide="bell" class="w-7 h-7 stroke-[2.5]"></i>
+                </div>
+                <div>
+                    <h4 class="font-extrabold text-gray-900 text-lg">{{ reminder.title }}</h4>
+                    <p class="text-sm font-bold text-gray-400">{{ reminder.time }} • {{ reminder.days or 'Tous les jours' }}</p>
+                </div>
+            </div>
+            <a href="{{ url_for('main.toggle_reminder', id=reminder.id) }}" class="flex items-center">
+                <!-- Soft UI Toggle Switch -->
+                <div class="w-14 h-8 rounded-full p-1 transition-colors duration-300 {% if reminder.is_active %}bg-green-500{% else %}bg-gray-200{% endif %} relative">
+                    <div class="w-6 h-6 bg-white rounded-full shadow-md transform transition-transform duration-300 {% if reminder.is_active %}translate-x-6{% endif %}"></div>
+                </div>
+            </a>
+        </div>
+        {% else %}
+        <div class="text-center py-20 bg-white rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-dashed border-gray-200">
+            <div class="w-20 h-20 bg-gray-50 rounded-3xl flex items-center justify-center mx-auto mb-6 text-gray-300">
+                <i data-lucide="alarm-clock-off" class="w-10 h-10"></i>
+            </div>
+            <h3 class="text-xl font-bold text-gray-900">Aucun rappel</h3>
+            <p class="text-gray-500 font-medium mt-2">Vous n'avez pas encore configuré de rappels.</p>
+            <a href="{{ url_for('main.add_reminder') }}" class="mt-8 inline-block px-8 py-3 bg-blue-600 text-white font-bold rounded-2xl shadow-lg shadow-blue-200 hover:bg-blue-700 transition active:scale-95">
+                Créer un rappel
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

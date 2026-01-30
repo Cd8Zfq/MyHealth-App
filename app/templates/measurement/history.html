@@ -1,0 +1,270 @@
+{% extends "base.html" %}
+
+{% block title %}Historique{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    
+    <div class="flex items-center justify-between pb-2 border-b border-gray-100">
+        <h1 class="text-2xl font-extrabold text-gray-900">Historique complet</h1>
+        <div class="flex gap-2">
+            <button class="p-2 text-gray-400 hover:text-blue-600 transition bg-gray-50 rounded-xl" title="Filtrer">
+                <i data-lucide="filter" class="w-5 h-5"></i>
+            </button>
+            <a href="{{ url_for('main.export_excel') }}" class="p-2 text-gray-400 hover:text-green-600 transition bg-gray-50 rounded-xl" title="Exporter Excel">
+                <i data-lucide="download" class="w-5 h-5"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- Chart Section -->
+    {% if measurements %}
+    <div class="bg-white p-6 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+        <div class="flex items-center justify-between mb-6">
+            <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wide">Évolution</h3>
+            
+            <!-- Filter Buttons -->
+            <div class="flex bg-gray-50 rounded-xl p-1 gap-1">
+                <button onclick="updateChart('all')" id="btn-all" class="px-3 py-1 text-xs font-bold rounded-lg bg-white text-gray-900 shadow-sm transition-all filter-btn">Tous</button>
+                <button onclick="updateChart('tension')" id="btn-tension" class="px-3 py-1 text-xs font-bold rounded-lg text-gray-500 hover:text-gray-900 transition-all filter-btn">Tension</button>
+                <button onclick="updateChart('glycemie')" id="btn-glycemie" class="px-3 py-1 text-xs font-bold rounded-lg text-gray-500 hover:text-gray-900 transition-all filter-btn">Glycémie</button>
+                <button onclick="updateChart('poids')" id="btn-poids" class="px-3 py-1 text-xs font-bold rounded-lg text-gray-500 hover:text-gray-900 transition-all filter-btn">Poids</button>
+            </div>
+        </div>
+        <div class="h-64 w-full">
+            <canvas id="historyChart"></canvas>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if measurements %}
+    <div class="space-y-3">
+        {% for m in measurements %}
+        <div class="bg-white rounded-[1.5rem] p-5 shadow-[0_4px_20px_rgb(0,0,0,0.02)] flex flex-col gap-3 transition hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-transparent hover:border-blue-50">
+            <div class="flex items-start justify-between">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0
+                        {% if m.type == 'tension' %}bg-red-50 text-red-500
+                        {% elif m.type == 'glycemie' %}bg-blue-50 text-blue-500
+                        {% elif m.type == 'poids' %}bg-green-50 text-green-500
+                        {% else %}bg-gray-50 text-gray-500{% endif %}">
+                        {% if m.type == 'tension' %}<i data-lucide="heart" class="w-6 h-6"></i>
+                        {% elif m.type == 'glycemie' %}<i data-lucide="candy" class="w-6 h-6"></i>
+                        {% elif m.type == 'poids' %}<i data-lucide="scale" class="w-6 h-6"></i>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <h3 class="text-base font-bold text-gray-900 capitalize">{{ m.type }}</h3>
+                        <p class="text-xs font-bold text-gray-400">{{ m.date.strftime('%d %b %Y à %H:%M') }}</p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <span class="text-xl font-extrabold text-gray-900">
+                        {{ m.value1 }}{% if m.value2 %}<span class="text-base text-gray-400 font-bold">/{{ m.value2 }}</span>{% endif %}
+                    </span>
+                    <span class="text-xs font-bold text-gray-400 block">{{ m.unit }}</span>
+                </div>
+            </div>
+            
+            {% if m.notes %}
+            <div class="text-xs font-medium text-gray-500 bg-gray-50 p-3 rounded-xl flex items-start gap-2">
+                <i data-lucide="message-square" class="w-4 h-4 mt-0.5 text-gray-400 shrink-0"></i>
+                {{ m.notes }}
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="flex flex-col items-center justify-center py-20 text-center">
+        <div class="w-20 h-20 bg-gray-50 rounded-3xl flex items-center justify-center mb-6 text-gray-300">
+            <i data-lucide="clipboard-list" class="w-10 h-10"></i>
+        </div>
+        <h3 class="text-xl font-bold text-gray-900">Aucune donnée</h3>
+        <p class="text-gray-500 font-medium mt-2 max-w-xs">Votre historique est vide pour le moment.</p>
+        <a href="{{ url_for('main.select_measurement_method') }}" class="mt-8 px-8 py-3 bg-blue-600 text-white font-bold rounded-2xl shadow-lg shadow-blue-200 hover:bg-blue-700 transition active:scale-95">
+            Ajouter une mesure
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+{% if measurements %}
+<script>
+    let historyChart;
+    let rawData = [];
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const ctx = document.getElementById('historyChart').getContext('2d');
+        rawData = JSON.parse('{{ chart_data_json|safe }}');
+        
+        // Initialize with 'all' view by default
+        initChart(ctx);
+        updateChart('all');
+    });
+
+    function initChart(ctx) {
+        historyChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: []
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#1F2937',
+                        padding: 12,
+                        cornerRadius: 12,
+                        titleFont: { family: 'Nunito', size: 12 },
+                        bodyFont: { family: 'Nunito', size: 14, weight: 'bold' },
+                        displayColors: true, // Show color box in tooltip
+                        callbacks: {
+                            label: function(context) {
+                                // Get the raw data object corresponding to this point
+                                // If 'all', context.dataIndex maps to rawData index directly
+                                // If filtered, we need to map differently or store reference
+                                
+                                let val = context.raw;
+                                let label = context.dataset.label + ': ' + val;
+                                
+                                // Try to find the second value (diastolic) for Tension
+                                // We need access to the original object.
+                                // In 'all' mode: rawData[context.dataIndex]
+                                // In filtered mode: currentFilteredData[context.dataIndex]
+                                
+                                const index = context.dataIndex;
+                                const item = currentFilteredData ? currentFilteredData[index] : rawData[index];
+                                
+                                if (item && item.val2 && context.dataset.label === 'Tension') {
+                                    label += '/' + item.val2;
+                                }
+                                
+                                // Add unit
+                                if (item && item.type === 'tension') label += ' mmHg';
+                                else if (item && item.type === 'glycemie') label += ' mg/dL';
+                                else if (item && item.type === 'poids') label += ' kg';
+
+                                return label;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: {
+                            font: { size: 10, family: 'Nunito', weight: 'bold' },
+                            color: '#9CA3AF',
+                            maxTicksLimit: 6
+                        }
+                    },
+                    y: {
+                        grid: { color: '#F3F4F6', borderDash: [5, 5] },
+                        ticks: {
+                            font: { size: 10, family: 'Nunito', weight: 'bold' },
+                            color: '#9CA3AF',
+                            padding: 10
+                        },
+                        beginAtZero: false
+                    }
+                },
+                interaction: {
+                    mode: 'index',
+                    intersect: false
+                }
+            }
+        });
+    }
+
+    let currentFilteredData = null;
+
+    function updateChart(type) {
+        // Reset datasets
+        historyChart.data.datasets = [];
+        
+        if (type === 'all') {
+            currentFilteredData = null; // Used rawData direct mapping
+            historyChart.data.labels = rawData.map(d => d.date);
+
+            // Dataset 1: Tension (Red)
+            historyChart.data.datasets.push({
+                label: 'Tension',
+                data: rawData.map(d => d.type === 'tension' ? d.val1 : null),
+                borderColor: '#EF4444',
+                backgroundColor: '#EF4444',
+                borderWidth: 2,
+                pointRadius: 3,
+                spanGaps: true,
+                tension: 0.4
+            });
+
+            // Dataset 2: Glycémie (Blue)
+            historyChart.data.datasets.push({
+                label: 'Glycémie',
+                data: rawData.map(d => d.type === 'glycemie' ? d.val1 : null),
+                borderColor: '#2563EB',
+                backgroundColor: '#2563EB',
+                borderWidth: 2,
+                pointRadius: 3,
+                spanGaps: true,
+                tension: 0.4
+            });
+
+            // Dataset 3: Poids (Green)
+            historyChart.data.datasets.push({
+                label: 'Poids',
+                data: rawData.map(d => d.type === 'poids' ? d.val1 : null),
+                borderColor: '#22C55E',
+                backgroundColor: '#22C55E',
+                borderWidth: 2,
+                pointRadius: 3,
+                spanGaps: true,
+                tension: 0.4
+            });
+
+        } else {
+            // Filter Data for specific type
+            const filteredData = rawData.filter(item => item.type === type);
+            currentFilteredData = filteredData;
+
+            historyChart.data.labels = filteredData.map(d => d.date);
+            
+            let color = '#2563EB'; // Default Blue
+            let label = 'Valeur';
+            if (type === 'tension') { color = '#EF4444'; label = 'Tension'; }
+            if (type === 'glycemie') { color = '#2563EB'; label = 'Glycémie'; }
+            if (type === 'poids') { color = '#22C55E'; label = 'Poids'; }
+
+            historyChart.data.datasets.push({
+                label: label,
+                data: filteredData.map(d => d.val1),
+                borderColor: color,
+                backgroundColor: color + '10', // Low opacity fill
+                pointBorderColor: color,
+                borderWidth: 3,
+                pointRadius: 4,
+                fill: true, // Fill area only for single view
+                tension: 0.4
+            });
+        }
+
+        historyChart.update();
+
+        // Update Buttons UI
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.classList.remove('bg-white', 'text-gray-900', 'shadow-sm');
+            btn.classList.add('text-gray-500');
+        });
+        const activeBtn = document.getElementById('btn-' + type);
+        if(activeBtn) {
+            activeBtn.classList.add('bg-white', 'text-gray-900', 'shadow-sm');
+            activeBtn.classList.remove('text-gray-500');
+        }
+    }
+</script>
+{% endif %}
+{% endblock %}

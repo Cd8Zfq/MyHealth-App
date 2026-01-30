@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Espace Médecin - Patients{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto p-6">
+    <h2 class="text-2xl font-semibold text-medical-text mb-8">Espace Médecin - Liste des Patients</h2>
+
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+        <table class="w-full text-left">
+            <thead class="bg-slate-50 border-b border-slate-100">
+                <tr>
+                    <th class="px-6 py-4 text-sm font-semibold text-slate-600">Patient</th>
+                    <th class="px-6 py-4 text-sm font-semibold text-slate-600">Email</th>
+                    <th class="px-6 py-4 text-sm font-semibold text-slate-600 text-right">Action</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-50">
+                {% for patient in patients %}
+                <tr class="hover:bg-slate-50/50 transition-colors">
+                    <td class="px-6 py-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xs">
+                                {{ patient.email[0].upper() }}
+                            </div>
+                            <span class="font-medium text-slate-700">Patient #{{ patient.id }}</span>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 text-sm text-slate-500">{{ patient.email }}</td>
+                    <td class="px-6 py-4 text-right">
+                        <a href="{{ url_for('main.patient_history', user_id=patient.id) }}" class="text-blue-600 hover:text-blue-800 text-sm font-medium">Consulter</a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="3" class="px-6 py-10 text-center text-slate-400">Aucun patient trouvé.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
