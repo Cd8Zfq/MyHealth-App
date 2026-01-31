@@ -7,7 +7,7 @@
 *   **Tableau de Bord Intuitif** : Visualisation rapide de la dernière mesure et des indicateurs de santé.
 *   **Suivi Multi-paramètres** :
     *   ❤️ **Tension Artérielle** (Systolique/Diastolique)
-    *   🍬 **Glycémie** (Gestion optimisée avec icône sucre)
+    *   🍬 **Glycémie**
     *   ⚖️ **Poids**
 *   **Graphiques Dynamiques** : Visualisation de l'évolution des mesures via Chart.js (limité aux 8 dernières mesures par type pour la clarté).
 *   **Saisie Intelligente** : Si deux mesures du même type sont saisies à moins de 30 minutes d'intervalle, l'application calcule automatiquement la moyenne.
