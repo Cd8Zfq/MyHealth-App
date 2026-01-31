@@ -7,13 +7,32 @@
     
     <div class="flex items-center justify-between pb-2 border-b border-gray-100">
         <h1 class="text-2xl font-extrabold text-gray-900">Historique complet</h1>
-        <div class="flex gap-2">
+        <div class="flex gap-2 relative" id="exportMenuContainer">
             <button class="p-2 text-gray-400 hover:text-blue-600 transition bg-gray-50 rounded-xl" title="Filtrer">
                 <i data-lucide="filter" class="w-5 h-5"></i>
             </button>
-            <a href="{{ url_for('main.export_excel') }}" class="p-2 text-gray-400 hover:text-green-600 transition bg-gray-50 rounded-xl" title="Exporter Excel">
+            
+            <button onclick="toggleExportMenu()" class="p-2 text-gray-400 hover:text-blue-600 transition bg-gray-50 rounded-xl" title="Exporter">
                 <i data-lucide="download" class="w-5 h-5"></i>
-            </a>
+            </button>
+
+            <!-- Export Dropdown -->
+            <div id="exportDropdown" class="hidden absolute right-0 top-12 w-48 bg-white rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.1)] border border-gray-100 z-50 overflow-hidden transform origin-top-right transition-all">
+                <div class="p-1.5 space-y-1">
+                    <a href="{{ url_for('main.export_pdf') }}" class="flex items-center gap-3 px-4 py-3 text-sm font-bold text-gray-700 hover:bg-gray-50 rounded-xl transition group">
+                        <div class="w-8 h-8 rounded-lg bg-red-50 text-red-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <i data-lucide="file-text" class="w-4 h-4"></i>
+                        </div>
+                        PDF
+                    </a>
+                    <a href="{{ url_for('main.export_excel') }}" class="flex items-center gap-3 px-4 py-3 text-sm font-bold text-gray-700 hover:bg-gray-50 rounded-xl transition group">
+                        <div class="w-8 h-8 rounded-lg bg-green-50 text-green-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <i data-lucide="table" class="w-4 h-4"></i>
+                        </div>
+                        Excel
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -87,6 +106,20 @@
     </div>
 
     <script>
+        function toggleExportMenu() {
+            const menu = document.getElementById('exportDropdown');
+            menu.classList.toggle('hidden');
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const container = document.getElementById('exportMenuContainer');
+            const menu = document.getElementById('exportDropdown');
+            if (container && !container.contains(event.target)) {
+                menu.classList.add('hidden');
+            }
+        });
+
         document.addEventListener("DOMContentLoaded", function() {
             const track = document.getElementById('tips-track');
             const indicators = document.querySelectorAll('.tip-indicator');
