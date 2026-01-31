@@ -1,0 +1,211 @@
+{% extends "base.html" %}
+
+{% block title %}Agenda Docteur{% endblock %}
+
+{% block content %}
+<div class="flex flex-col h-[calc(100vh-140px)] bg-[#FFF9F0]">
+
+    <!-- 1. WEEK STRIP (Sticky Header) -->
+    <div class="px-4 py-4 z-20 flex-shrink-0">
+        <div class="flex items-center justify-between mb-4">
+            <h1 class="text-2xl font-bold text-gray-900 capitalize">{{ current_date.strftime('%B %Y') }}</h1>
+        </div>
+
+        <div class="flex overflow-x-auto pb-2 gap-2 snap-x md:grid md:grid-cols-7 no-scrollbar">
+            {% for day in week_days %}
+                <a href="{{ url_for('main.agenda', date=day.date_str) }}" 
+                   class="flex flex-col items-center justify-center py-3 rounded-[1.5rem] transition-all duration-300 border shadow-sm flex-shrink-0 w-16 md:w-auto snap-center
+                          {% if day.is_active %}
+                            bg-blue-600 text-white border-blue-600 shadow-blue-200 scale-105
+                          {% else %}
+                            bg-white text-gray-400 border-white hover:border-blue-100 hover:text-blue-500
+                          {% endif %}">
+                    <span class="text-[10px] font-bold uppercase tracking-wider opacity-80">{{ day.day_name }}</span>
+                    <span class="text-lg font-extrabold mt-0.5">{{ day.day_num }}</span>
+                </a>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- 2. TIMELINE VERTICALE -->
+    <div class="flex-grow overflow-y-auto relative rounded-t-[2.5rem] bg-white shadow-[0_-10px_40px_rgba(0,0,0,0.02)] border-t border-gray-50 pt-6" id="agenda-scroll">
+        
+        <!-- Empty State -->
+        {% if not appointments %}
+        <div class="flex flex-col items-center justify-center h-full text-center p-8 opacity-50">
+            <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4 text-gray-400">
+                <i data-lucide="calendar-x" class="w-8 h-8"></i>
+            </div>
+            <p class="font-bold text-gray-400">Aucun rendez-vous ce jour.</p>
+        </div>
+        {% else %}
+
+            <!-- Grid Lines -->
+            <div class="absolute inset-0 pointer-events-none px-4 pt-6">
+                {% for hour in range(8, 20) %}
+                <div class="h-24 border-t border-dashed border-gray-100 w-full relative">
+                    <span class="absolute -top-3 left-0 text-[10px] font-bold text-gray-300">{{ hour }}:00</span>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- "Now" Indicator -->
+            {% if is_today and now_offset_percent > 0 %}
+            <div class="absolute left-16 right-4 border-t-2 border-red-500 z-20 flex items-center pointer-events-none" 
+                 style="top: calc(1.5rem + {{ (now_offset_percent / 100) * 1056 }}px)"> 
+                <div class="w-3 h-3 bg-red-500 rounded-full -ml-1.5 shadow-sm"></div>
+                <span class="ml-2 text-[10px] font-bold text-white bg-red-500 px-2 py-0.5 rounded-full shadow-sm">En cours</span>
+            </div>
+            {% endif %}
+
+            <!-- Appointments Container -->
+            <div class="relative ml-16 mr-4 h-[1152px] mt-0"> 
+                {% for apt in appointments %}
+                    {% set start_minutes = (apt.start_time.hour - 8) * 60 + apt.start_time.minute %}
+                    {% set top_px = (start_minutes / 60) * 96 %}
+                    {% set height_px = (apt.duration / 60) * 96 %}
+                    
+                    <!-- CASE B: CRÉNEAU LIBRE (FREE) -->
+                    {% if apt.status == 'free' %}
+                    <div class="absolute left-0 right-0 rounded-[1.5rem] p-3 border-2 border-dashed border-gray-200 bg-gray-50/50 flex items-center justify-between group hover:border-gray-400 transition-colors"
+                         style="top: {{ top_px }}px; height: {{ height_px }}px;">
+                         <span class="text-xs font-bold text-gray-400 ml-2">Créneau disponible</span>
+                         
+                         <a href="{{ url_for('main.reject_appointment', id=apt.id) }}" class="w-8 h-8 rounded-full bg-white flex items-center justify-center text-red-400 shadow-sm hover:text-red-600 hover:shadow-md transition">
+                             <i data-lucide="trash-2" class="w-4 h-4"></i>
+                         </a>
+                    </div>
+                    
+                    <!-- CASE A: EN ATTENTE (PENDING) -->
+                    {% elif apt.status == 'pending' %}
+                    <div class="absolute left-0 right-0 rounded-[1.5rem] p-3 border-l-[6px] border-l-orange-400 bg-orange-50 shadow-sm flex flex-col justify-center z-10"
+                         style="top: {{ top_px }}px; height: {{ height_px }}px;">
+                        
+                        <div class="flex justify-between items-center w-full">
+                             <div class="flex items-center gap-3">
+                                 <div class="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></div>
+                                 <span class="text-sm font-bold text-orange-900 truncate">Demande: {{ apt.patient.patient.first_name }} {{ apt.patient.patient.last_name }}</span>
+                             </div>
+                             
+                             <div class="flex gap-2">
+                                 <a href="{{ url_for('main.reject_appointment', id=apt.id) }}" class="p-2 rounded-xl border border-red-200 text-red-500 hover:bg-red-50 transition active:scale-95">
+                                     <i data-lucide="x" class="w-5 h-5"></i>
+                                 </a>
+                                 <a href="{{ url_for('main.accept_appointment', id=apt.id) }}" class="p-2 rounded-xl bg-green-500 text-white shadow-md shadow-green-200 hover:bg-green-600 transition active:scale-95">
+                                     <i data-lucide="check" class="w-5 h-5"></i>
+                                 </a>
+                             </div>
+                        </div>
+                    </div>
+
+                    <!-- CASE STANDARD: CONFIRMED -->
+                    {% else %}
+                    <div class="absolute left-0 right-0 rounded-[1.5rem] p-3 border-l-[6px] shadow-sm hover:shadow-lg transition-all cursor-pointer group flex gap-3 overflow-hidden
+                                {% if apt.is_visio() %}
+                                    bg-blue-50 border-l-blue-500 text-blue-900
+                                {% else %}
+                                    bg-white border-l-gray-200 text-gray-900
+                                {% endif %}
+                                {% if apt.is_past() %}opacity-60 grayscale{% endif %}"
+                         style="top: {{ top_px }}px; height: {{ height_px }}px;">
+                        
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed={{ apt.patient.patient.first_name }}{{ apt.patient.patient.last_name }}" 
+                             alt="Avatar" class="w-10 h-10 rounded-full bg-white shadow-sm shrink-0">
+                        
+                        <div class="flex-grow min-w-0 flex flex-col justify-center">
+                            <div class="flex justify-between items-start w-full">
+                                <div>
+                                    <h4 class="font-bold text-sm truncate">{{ apt.patient.patient.first_name }} {{ apt.patient.patient.last_name }}</h4>
+                                    <div class="flex items-center gap-2 mt-0.5">
+                                        {% if apt.is_visio() %}
+                                            <div class="flex items-center gap-1 text-[10px] font-bold uppercase text-blue-600 bg-white/60 px-2 py-0.5 rounded-lg">
+                                                <i data-lucide="video" class="w-3 h-3"></i> Visio
+                                            </div>
+                                        {% else %}
+                                            <div class="flex items-center gap-1 text-[10px] font-bold uppercase text-gray-500 bg-gray-100 px-2 py-0.5 rounded-lg">
+                                                <i data-lucide="map-pin" class="w-3 h-3"></i> Cabinet
+                                            </div>
+                                        {% endif %}
+                                        <span class="text-[10px] font-medium opacity-60">{{ apt.duration }} min</span>
+                                    </div>
+                                </div>
+                                
+                                {% if apt.is_visio() and not apt.is_past() %}
+                                <button class="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center shadow-md active:scale-95 hover:bg-blue-700 transition">
+                                    <i data-lucide="play" class="w-3 h-3 ml-0.5"></i>
+                                </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+
+        {% endif %}
+    </div>
+
+    <!-- CASE C: INTERACTION "+" (FAB) & DIALOG -->
+    <button onclick="document.getElementById('addSlotDialog').showModal()" 
+            class="hidden md:flex fixed bottom-24 right-6 w-14 h-14 bg-slate-900 text-white rounded-[1.2rem] shadow-xl shadow-slate-300 items-center justify-center hover:scale-105 active:scale-95 transition-all z-30">
+        <i data-lucide="plus" class="w-7 h-7"></i>
+    </button>
+
+    <dialog id="addSlotDialog" class="p-0 rounded-3xl backdrop:bg-black/30 w-full max-w-sm shadow-2xl m-auto backdrop:backdrop-blur-sm">
+        <form method="POST" action="{{ url_for('main.create_slot') }}" class="flex flex-col bg-white p-6 gap-4">
+            <div class="flex justify-between items-center mb-2">
+                <h3 class="text-xl font-bold text-gray-900">Libérer un créneau</h3>
+                <button type="button" onclick="document.getElementById('addSlotDialog').close()" class="p-2 rounded-full hover:bg-gray-100 text-gray-500">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            
+            <div>
+                <label class="text-sm font-bold text-gray-500 ml-1">Date</label>
+                <input type="date" name="date" value="{{ current_date.strftime('%Y-%m-%d') }}" required
+                       class="w-full mt-1 p-3 bg-gray-50 rounded-2xl border-none focus:ring-2 focus:ring-blue-500 font-bold text-gray-900">
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="text-sm font-bold text-gray-500 ml-1">Début</label>
+                    <input type="time" name="time" required
+                           class="w-full mt-1 p-3 bg-gray-50 rounded-2xl border-none focus:ring-2 focus:ring-blue-500 font-bold text-gray-900">
+                </div>
+                <div>
+                    <label class="text-sm font-bold text-gray-500 ml-1">Fin (Opt.)</label>
+                    <input type="time" name="end_time"
+                           class="w-full mt-1 p-3 bg-gray-50 rounded-2xl border-none focus:ring-2 focus:ring-blue-500 font-bold text-gray-900">
+                </div>
+            </div>
+            
+            <button type="submit" class="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-200 mt-2 active:scale-95 transition-transform">
+                Valider la disponibilité
+            </button>
+        </form>
+    </dialog>
+
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // 1. Center the "Now" line
+        const scrollContainer = document.getElementById('agenda-scroll');
+        const nowLine = document.querySelector('.border-red-500');
+        if (nowLine && scrollContainer) {
+            const topPos = nowLine.offsetTop - (scrollContainer.clientHeight / 2);
+            scrollContainer.scrollTop = topPos > 0 ? topPos : 0;
+        }
+
+        // 2. Hook navbar "+" button for Doctors
+        const mobileAddBtn = document.getElementById('doctorMobileAddBtn');
+        const dialog = document.getElementById('addSlotDialog');
+        if (mobileAddBtn && dialog) {
+            mobileAddBtn.addEventListener('click', function(e) {
+                e.preventDefault(); // Stop navigation
+                dialog.showModal(); // Open slot creation
+            });
+        }
+    });
+</script>
+{% endblock %}

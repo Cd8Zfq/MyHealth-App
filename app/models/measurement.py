@@ -15,32 +15,51 @@ class Measurement(db.Model):
     unit = db.Column(db.String(20), nullable=False)
     date = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     notes = db.Column(db.Text, nullable=True)
+    
+    # Relationship
+    user = db.relationship('User', backref='measurements')
 
     def __repr__(self):
         return f'<Measurement {self.type}: {self.value1}/{self.value2} {self.unit}>'
 
     @property
-    def status_color(self):
-        # Returns Tailwind color class part: 'green-600', 'amber-500', 'red-600'
-        # Green #16A34A -> text-green-600
-        # Orange #F59E0B -> text-amber-500
-        # Red #DC2626 -> text-red-600
-        
+    def severity(self):
+        """
+        Determine severity level: 'normal', 'warning', 'high'.
+        """
         if self.type == 'tension':
             if self.value1 >= 140 or (self.value2 and self.value2 >= 90):
-                return 'text-red-600'
+                return 'high'
             elif self.value1 >= 120 or (self.value2 and self.value2 >= 80):
-                return 'text-amber-500'
-            else:
-                return 'text-green-600'
+                return 'warning'
         
         elif self.type == 'glycemie':
             if self.value1 >= 126:
-                return 'text-red-600'
+                return 'high'
             elif self.value1 >= 100:
-                return 'text-amber-500'
-            else:
-                return 'text-green-600'
+                return 'warning'
                 
-        # Default green for others
+        return 'normal'
+
+    @property
+    def status_color(self):
+        # Returns Tailwind color class part
+        sev = self.severity
+        if sev == 'high':
+            return 'text-red-600'
+        elif sev == 'warning':
+            return 'text-amber-500'
         return 'text-green-600'
+
+    @property
+    def is_alert(self):
+        """
+        Checks if the measurement should trigger a doctor alert.
+        Thresholds: Tension > 140/90, Glycemie > 180.
+        """
+        if self.type == 'tension':
+            # Keeping strict > 140 to match original doctor dashboard logic
+            return self.value1 > 140 or (self.value2 and self.value2 > 90)
+        elif self.type == 'glycemie':
+            return self.value1 > 180
+        return False

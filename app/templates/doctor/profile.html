@@ -1,99 +1,68 @@
 {% extends "base.html" %}
 
-{% block title %}Profil Médecin{% endblock %}
+{% block title %}Profil{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-    <div class="bg-white rounded-[2.5rem] shadow-xl shadow-blue-50 border border-orange-50 overflow-hidden">
-        
-        <!-- Header Section -->
-        <div class="px-8 py-10 bg-warmBlue/5 border-b border-orange-50 flex flex-col md:flex-row items-center justify-between gap-6">
-            <div class="flex items-center gap-6">
-                <div class="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-md border-4 border-white text-warmBlue">
-                    <i data-lucide="stethoscope" class="w-12 h-12"></i>
-                </div>
-                <div>
-                    <h1 class="text-3xl font-extrabold text-mainText">Docteur</h1>
-                    <p class="text-mutedText font-medium mt-1">{{ current_user.email }}</p>
-                    <div class="flex items-center gap-2 mt-3">
-                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700">
-                            <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                            Compte Actif
-                        </span>
-                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-700">
-                            Médecin
-                        </span>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="flex gap-3">
-               <!-- Placeholder for future actions -->
-            </div>
+<div class="space-y-6">
+    
+    <div class="flex items-center gap-4 pb-6 border-b border-slate-200">
+        <div class="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 text-2xl font-bold border-2 border-white shadow-sm">
+            {{ patient.first_name[0]|upper if patient.first_name else '?' }}
         </div>
-
-        <!-- Content Grid -->
-        <div class="p-8 grid md:grid-cols-2 gap-8">
-            
-            <!-- Quick Stats / Info -->
-            <div class="space-y-6">
-                <h3 class="text-xl font-bold text-mainText flex items-center gap-2">
-                    <i data-lucide="activity" class="w-5 h-5 text-warmBlue"></i>
-                    Activité
-                </h3>
-                
-                <div class="grid grid-cols-1 gap-4">
-                    <a href="{{ url_for('main.patients') }}" class="group block p-6 bg-slate-50 rounded-3xl border border-slate-100 hover:bg-blue-50 hover:border-blue-100 transition duration-300">
-                        <div class="flex items-center justify-between mb-4">
-                            <div class="bg-white p-3 rounded-2xl shadow-sm text-warmBlue group-hover:scale-110 transition">
-                                <i data-lucide="users" class="w-6 h-6"></i>
-                            </div>
-                            <i data-lucide="arrow-right" class="w-5 h-5 text-slate-300 group-hover:text-warmBlue transition"></i>
-                        </div>
-                        <p class="text-3xl font-extrabold text-mainText group-hover:text-warmBlue transition">{{ patient_count }}</p>
-                        <p class="text-sm font-bold text-mutedText">Patients suivis</p>
-                    </a>
-                </div>
-            </div>
-
-            <!-- Account Details -->
-            <div class="space-y-6">
-                <h3 class="text-xl font-bold text-mainText flex items-center gap-2">
-                    <i data-lucide="shield" class="w-5 h-5 text-warmBlue"></i>
-                    Informations du compte
-                </h3>
-                
-                <div class="bg-slate-50 rounded-3xl p-6 space-y-4 border border-slate-100">
-                    <div class="flex items-start gap-4">
-                        <div class="mt-1 bg-white p-2 rounded-xl text-slate-400 shadow-sm">
-                            <i data-lucide="mail" class="w-4 h-4"></i>
-                        </div>
-                        <div>
-                            <p class="text-xs font-bold text-slate-400 uppercase tracking-wide">Adresse Email</p>
-                            <p class="font-bold text-mainText break-all">{{ current_user.email }}</p>
-                        </div>
-                    </div>
-
-                    <div class="flex items-start gap-4">
-                        <div class="mt-1 bg-white p-2 rounded-xl text-slate-400 shadow-sm">
-                            <i data-lucide="lock" class="w-4 h-4"></i>
-                        </div>
-                        <div>
-                            <p class="text-xs font-bold text-slate-400 uppercase tracking-wide">Mot de passe</p>
-                            <p class="font-bold text-mainText">••••••••</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="pt-4">
-                    <button class="w-full py-4 rounded-2xl border-2 border-slate-200 text-slate-500 font-bold hover:border-slate-300 hover:bg-slate-50 transition flex items-center justify-center gap-2 cursor-not-allowed opacity-50" disabled>
-                        <i data-lucide="settings" class="w-4 h-4"></i>
-                        Modifier mes informations
-                    </button>
-                    <p class="text-center text-xs text-slate-400 mt-2">Contactez l'administrateur pour modifier ces données.</p>
-                </div>
-            </div>
+        <div>
+            <h1 class="text-xl font-bold text-slate-900">{{ patient.first_name or 'Docteur' }} {{ patient.last_name or '' }}</h1>
+            <p class="text-sm text-slate-500">{{ current_user.email }}</p>
         </div>
     </div>
+
+    <form method="POST" action="{{ url_for('main.profile') }}" class="space-y-6">
+        
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 space-y-4">
+            <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wide flex items-center gap-2">
+                <i data-lucide="user" class="w-4 h-4 text-primary"></i>
+                Informations Personnelles
+            </h2>
+            
+            <div class="grid md:grid-cols-2 gap-4">
+                <div class="space-y-1">
+                    <label class="text-xs font-semibold text-slate-600">Prénom</label>
+                    <input type="text" name="first_name" value="{{ patient.first_name or '' }}" class="block w-full rounded-lg border-slate-200 bg-slate-50 text-sm focus:border-primary focus:ring-primary focus:bg-white transition-colors">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-xs font-semibold text-slate-600">Nom</label>
+                    <input type="text" name="last_name" value="{{ patient.last_name or '' }}" class="block w-full rounded-lg border-slate-200 bg-slate-50 text-sm focus:border-primary focus:ring-primary focus:bg-white transition-colors">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-xs font-semibold text-slate-600">Date de naissance</label>
+                    <input type="date" name="date_of_birth" value="{{ patient.date_of_birth or '' }}" class="block w-full rounded-lg border-slate-200 bg-slate-50 text-sm focus:border-primary focus:ring-primary focus:bg-white transition-colors">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-xs font-semibold text-slate-600">Téléphone</label>
+                    <input type="tel" name="phone" value="{{ patient.phone or '' }}" class="block w-full rounded-lg border-slate-200 bg-slate-50 text-sm focus:border-primary focus:ring-primary focus:bg-white transition-colors">
+                </div>
+            </div>
+
+            <div class="space-y-1">
+                <label class="text-xs font-semibold text-slate-600">Adresse</label>
+                <textarea name="address" rows="2" class="block w-full rounded-lg border-slate-200 bg-slate-50 text-sm focus:border-primary focus:ring-primary focus:bg-white transition-colors resize-none">{{ patient.address or '' }}</textarea>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 space-y-4">
+            <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wide flex items-center gap-2">
+                <i data-lucide="shield" class="w-4 h-4 text-slate-400"></i>
+                Sécurité
+            </h2>
+            
+            <a href="{{ url_for('main.logout') }}" class="flex items-center justify-between p-3 rounded-lg border border-red-100 bg-red-50 text-danger hover:bg-red-100 transition active:scale-[0.99]">
+                <span class="text-sm font-medium">Déconnexion</span>
+                <i data-lucide="log-out" class="w-4 h-4"></i>
+            </a>
+        </div>
+
+        <button type="submit" class="w-full bg-slate-900 text-white font-semibold rounded-xl py-3.5 shadow-sm hover:bg-slate-800 transition active:scale-[0.98]">
+            Enregistrer les modifications
+        </button>
+    </form>
 </div>
 {% endblock %}

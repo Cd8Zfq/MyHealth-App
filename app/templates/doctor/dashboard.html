@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block title %}Cockpit Docteur{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+
+    <!-- Header -->
+    <div class="flex items-center justify-between pt-2 px-2">
+        <div class="space-y-1">
+            <h1 class="text-2xl font-extrabold text-gray-900 flex items-center gap-2">
+                Bonjour Dr. {{ current_user.patient.last_name or '' }}
+            </h1>
+            <p class="text-sm font-bold text-gray-400">Vue d'ensemble</p>
+        </div>
+        <a href="{{ url_for('main.profile') }}" class="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-gray-400 border border-gray-100 shadow-sm active:scale-95 transition-transform">
+            <i data-lucide="stethoscope" class="w-5 h-5"></i>
+        </a>
+    </div>
+
+    <!-- SECTION 1 : ALERTES (Priorité Haute) -->
+    <div>
+        <h3 class="text-sm font-bold text-gray-900 uppercase tracking-wide mb-3 ml-2 flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+            Alertes Critiques ({{ alerts|length }})
+        </h3>
+
+        {% if alerts %}
+        <div class="space-y-3">
+            {% for m in alerts %}
+            <div class="bg-red-50 p-4 rounded-[1.5rem] border border-red-100 flex items-center justify-between shadow-sm relative overflow-hidden group {% if loop.index > 4 %}hidden extra-alert{% endif %}">
+                <!-- Decorative BG -->
+                <div class="absolute -right-4 -top-4 w-20 h-20 bg-red-100 rounded-full opacity-50 group-hover:scale-150 transition-transform duration-500"></div>
+
+                <div class="flex items-center gap-4 relative z-10">
+                    <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-red-500 shadow-sm shrink-0">
+                        {% if m.type == 'tension' %}<i data-lucide="heart-pulse" class="w-6 h-6"></i>
+                        {% elif m.type == 'glycemie' %}<i data-lucide="candy" class="w-6 h-6"></i>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-gray-900 text-base">
+                            {{ m.user.patient.first_name }} {{ m.user.patient.last_name }}
+                        </h4>
+                        <p class="text-xs font-bold text-red-600 mt-0.5 uppercase tracking-wide">
+                            {{ m.type }} : {{ m.value1 }} {{ m.unit }}
+                        </p>
+                    </div>
+                </div>
+                
+                <a href="{{ url_for('main.patient_history', user_id=m.user_id) }}" class="relative z-10 w-10 h-10 bg-white rounded-full flex items-center justify-center text-red-500 hover:bg-red-600 hover:text-white transition-colors shadow-sm">
+                    <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+        
+        {% if alerts|length > 4 %}
+        <button id="seeAllAlertsBtn" onclick="toggleAlerts()" class="w-full py-3 text-center text-sm font-bold text-red-500 hover:text-red-700 bg-red-50/50 rounded-xl mt-2 transition hover:bg-red-100 cursor-pointer">
+            Voir tout ({{ alerts|length }})
+        </button>
+        <script>
+            function toggleAlerts() {
+                const extras = document.querySelectorAll('.extra-alert');
+                const btn = document.getElementById('seeAllAlertsBtn');
+                extras.forEach(el => el.classList.toggle('hidden'));
+                
+                if (btn.innerText.includes('Voir tout')) {
+                    btn.innerText = 'Voir moins';
+                } else {
+                    btn.innerText = 'Voir tout ({{ alerts|length }})';
+                }
+            }
+        </script>
+        {% endif %}
+
+        {% else %}
+        <div class="bg-green-50 p-6 rounded-[1.5rem] border border-green-100 text-center">
+            <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center text-green-500 mx-auto mb-3 shadow-sm">
+                <i data-lucide="check" class="w-6 h-6"></i>
+            </div>
+            <p class="text-green-800 font-bold text-sm">RAS : Aucun patient en zone critique.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- SECTION 2 : AGENDA IMMEDIAT (Timeline) -->
+    <div>
+        <div class="flex items-center justify-between mb-3 px-2">
+            <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+                <i data-lucide="calendar-clock" class="w-5 h-5 text-gray-400"></i>
+                Prochains Rendez-vous
+            </h3>
+            <a href="{{ url_for('main.agenda') }}" class="text-xs font-bold text-blue-600 bg-blue-50 px-3 py-1.5 rounded-lg hover:bg-blue-100 transition">Voir tout</a>
+        </div>
+        
+        <div class="space-y-4 relative before:absolute before:left-6 before:top-2 before:bottom-2 before:w-0.5 before:bg-gray-100">
+            {% if next_appointments %}
+                {% for apt in next_appointments %}
+                <div class="relative pl-16 pr-2 py-1 group">
+                    <!-- Time -->
+                    <div class="absolute left-0 top-3 text-xs font-bold text-gray-400 w-12 text-center group-hover:text-blue-600 transition-colors bg-bg-page z-10 py-1">
+                        {{ apt.start_time.strftime('%H:%M') }}
+                    </div>
+                    
+                    <!-- Card -->
+                    <div class="bg-white p-4 rounded-2xl shadow-[0_4px_15px_rgb(0,0,0,0.02)] border border-transparent hover:border-blue-100 transition-all hover:shadow-md flex items-center justify-between
+                        {% if apt.type == 'visio' %}border-l-4 border-l-blue-500{% else %}border-l-4 border-l-gray-300{% endif %}">
+                        
+                        <div>
+                            {% if apt.patient %}
+                                <h4 class="font-bold text-gray-900">{{ apt.patient.patient.first_name }} {{ apt.patient.patient.last_name }}</h4>
+                            {% else %}
+                                <h4 class="font-bold text-gray-400 italic">Créneau libre</h4>
+                            {% endif %}
+                            
+                            <div class="flex items-center gap-2 mt-1">
+                                {% if apt.type == 'visio' %}
+                                    <span class="inline-flex items-center gap-1 bg-blue-50 text-blue-600 px-2 py-0.5 rounded text-[10px] font-bold uppercase">
+                                        <i data-lucide="video" class="w-3 h-3"></i> Visio
+                                    </span>
+                                {% else %}
+                                    <span class="inline-flex items-center gap-1 bg-gray-50 text-gray-500 px-2 py-0.5 rounded text-[10px] font-bold uppercase">
+                                        <i data-lucide="map-pin" class="w-3 h-3"></i> Cabinet
+                                    </span>
+                                {% endif %}
+                                <span class="text-xs text-gray-400 font-medium">30 min</span>
+                            </div>
+                        </div>
+
+                        {% if apt.type == 'visio' %}
+                        <button class="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center shadow-md shadow-blue-200 hover:bg-blue-700 transition active:scale-95">
+                            <i data-lucide="video" class="w-5 h-5"></i>
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="pl-16 py-6 text-gray-400 text-sm font-medium italic">
+                    Aucun autre rendez-vous aujourd'hui.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,50 +1,112 @@
 {% extends "base.html" %}
 
-{% block title %}Mes rappels{% endblock %}
+{% block title %}Mes Rendez-vous & Rappels{% endblock %}
 
 {% block content %}
-<div class="space-y-8">
-    <div class="flex justify-between items-center px-2">
-        <div>
-            <h2 class="text-3xl font-extrabold text-gray-900">Rappels</h2>
-            <p class="text-gray-500 font-bold">Gérez vos prises de médicaments</p>
+<div class="space-y-12 pb-24">
+    
+    <!-- 1. SECTION RENDEZ-VOUS (NOUVEAU) -->
+    <div class="space-y-6">
+        <div class="flex justify-between items-center px-2">
+            <div>
+                <h2 class="text-2xl font-extrabold text-gray-900">Rendez-vous</h2>
+                <p class="text-gray-500 font-bold text-sm">Vos consultations à venir</p>
+            </div>
+            <a href="{{ url_for('main.book_appointment') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl shadow-lg shadow-blue-200 transition active:scale-95 flex items-center gap-2 font-bold text-sm">
+                <i data-lucide="calendar-plus" class="w-4 h-4"></i>
+                Prendre RDV
+            </a>
         </div>
-        <a href="{{ url_for('main.add_reminder') }}" class="bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-2xl shadow-lg shadow-blue-200 transition active:scale-95">
-            <i data-lucide="plus" class="w-6 h-6 stroke-[3]"></i>
-        </a>
+
+        <div class="grid gap-4">
+            {% if appointments %}
+                {% for apt in appointments %}
+                <div class="bg-white p-5 rounded-[1.5rem] shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-gray-50 flex justify-between items-center group hover:border-blue-100 transition-all">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center font-bold text-lg">
+                            {{ apt.start_time.day }}
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h4 class="font-bold text-gray-900">{{ apt.start_time.strftime('%B')|capitalize }}</h4>
+                                
+                                <!-- BADGES -->
+                                {% if apt.status == 'confirmed' %}
+                                    <span class="bg-green-100 text-green-700 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">Confirmé</span>
+                                {% elif apt.status == 'pending' %}
+                                    <span class="bg-orange-100 text-orange-700 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">En attente</span>
+                                {% elif apt.status == 'cancelled' %}
+                                    <span class="bg-red-100 text-red-700 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">Annulé</span>
+                                {% endif %}
+                            </div>
+                            <p class="text-sm text-gray-400 font-medium">{{ apt.start_time.strftime('%H:%M') }} • Dr. {{ apt.doctor.patient.last_name }}</p>
+                        </div>
+                    </div>
+                    
+                    {% if apt.type == 'visio' and apt.status == 'confirmed' %}
+                    <button class="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center hover:bg-blue-600 hover:text-white transition-colors">
+                        <i data-lucide="video" class="w-5 h-5"></i>
+                    </button>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="text-center py-12 bg-white/50 rounded-3xl border border-dashed border-gray-200 flex flex-col items-center gap-4">
+                    <p class="text-gray-400 text-sm font-medium">Aucun rendez-vous prévu.</p>
+                    <a href="{{ url_for('main.book_appointment') }}" class="px-6 py-2 bg-blue-100 text-blue-600 font-bold rounded-xl hover:bg-blue-200 transition active:scale-95 text-sm flex items-center gap-2">
+                        <i data-lucide="calendar-plus" class="w-4 h-4"></i>
+                        Prendre rendez-vous
+                    </a>
+                </div>
+            {% endif %}
+        </div>
     </div>
 
-    <div class="grid gap-4">
-        {% for reminder in reminders %}
-        <div class="bg-white p-6 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex justify-between items-center transition-all border border-transparent hover:border-blue-50 {% if not reminder.is_active %}opacity-60 grayscale{% endif %}">
-            <div class="flex items-center space-x-5">
-                <div class="w-14 h-14 bg-orange-50 text-orange-500 rounded-2xl flex items-center justify-center shadow-sm">
-                    <i data-lucide="bell" class="w-7 h-7 stroke-[2.5]"></i>
-                </div>
-                <div>
-                    <h4 class="font-extrabold text-gray-900 text-lg">{{ reminder.title }}</h4>
-                    <p class="text-sm font-bold text-gray-400">{{ reminder.time }} • {{ reminder.days or 'Tous les jours' }}</p>
-                </div>
+
+    <!-- 2. SECTION RAPPELS (EXISTANT) -->
+    <div class="space-y-6">
+        <div class="flex justify-between items-center px-2">
+            <div>
+                <h2 class="text-2xl font-extrabold text-gray-900">Rappels Traitements</h2>
             </div>
-            <a href="{{ url_for('main.toggle_reminder', id=reminder.id) }}" class="flex items-center">
-                <!-- Soft UI Toggle Switch -->
-                <div class="w-14 h-8 rounded-full p-1 transition-colors duration-300 {% if reminder.is_active %}bg-green-500{% else %}bg-gray-200{% endif %} relative">
-                    <div class="w-6 h-6 bg-white rounded-full shadow-md transform transition-transform duration-300 {% if reminder.is_active %}translate-x-6{% endif %}"></div>
-                </div>
+            <a href="{{ url_for('main.add_reminder') }}" class="w-10 h-10 bg-orange-100 text-orange-600 rounded-xl flex items-center justify-center hover:bg-orange-200 transition active:scale-95">
+                <i data-lucide="plus" class="w-5 h-5 stroke-[3]"></i>
             </a>
         </div>
-        {% else %}
-        <div class="text-center py-20 bg-white rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-dashed border-gray-200">
-            <div class="w-20 h-20 bg-gray-50 rounded-3xl flex items-center justify-center mx-auto mb-6 text-gray-300">
-                <i data-lucide="alarm-clock-off" class="w-10 h-10"></i>
+
+        <div class="grid gap-4">
+            {% for reminder in reminders %}
+            <div class="bg-white p-5 rounded-[1.5rem] shadow-[0_4px_20px_rgb(0,0,0,0.03)] flex justify-between items-center transition-all border border-transparent hover:border-orange-50 {% if not reminder.is_active %}opacity-60 grayscale{% endif %}">
+                <div class="flex items-center space-x-4">
+                    <div class="w-12 h-12 bg-orange-50 text-orange-500 rounded-2xl flex items-center justify-center">
+                        <i data-lucide="bell" class="w-6 h-6 stroke-[2.5]"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-gray-900">{{ reminder.title }}</h4>
+                        <p class="text-xs font-bold text-gray-400">{{ reminder.time }} • {{ reminder.days or 'Tous les jours' }}</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <a href="{{ url_for('main.delete_reminder', id=reminder.id) }}" class="p-2 text-red-400 hover:text-red-600 transition-colors" onclick="return confirm('Supprimer ce rappel ?')">
+                        <i data-lucide="trash-2" class="w-5 h-5"></i>
+                    </a>
+                    <a href="{{ url_for('main.toggle_reminder', id=reminder.id) }}" class="flex items-center">
+                        <div class="w-12 h-7 rounded-full p-1 transition-colors duration-300 {% if reminder.is_active %}bg-green-500{% else %}bg-gray-200{% endif %} relative">
+                            <div class="w-5 h-5 bg-white rounded-full shadow-md transform transition-transform duration-300 {% if reminder.is_active %}translate-x-5{% endif %}"></div>
+                        </div>
+                    </a>
+                </div>
             </div>
-            <h3 class="text-xl font-bold text-gray-900">Aucun rappel</h3>
-            <p class="text-gray-500 font-medium mt-2">Vous n'avez pas encore configuré de rappels.</p>
-            <a href="{{ url_for('main.add_reminder') }}" class="mt-8 inline-block px-8 py-3 bg-blue-600 text-white font-bold rounded-2xl shadow-lg shadow-blue-200 hover:bg-blue-700 transition active:scale-95">
-                Créer un rappel
-            </a>
+            {% else %}
+            <div class="text-center py-12 bg-white/50 rounded-3xl border border-dashed border-gray-200 flex flex-col items-center gap-4">
+                <p class="text-gray-400 text-sm font-medium">Aucun rappel configuré.</p>
+                <a href="{{ url_for('main.add_reminder') }}" class="px-6 py-2 bg-orange-100 text-orange-600 font-bold rounded-xl hover:bg-orange-200 transition active:scale-95 text-sm flex items-center gap-2">
+                    <i data-lucide="plus" class="w-4 h-4"></i>
+                    Créer un rappel
+                </a>
+            </div>
+            {% endfor %}
         </div>
-        {% endfor %}
     </div>
 </div>
 {% endblock %}

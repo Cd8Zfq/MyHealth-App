@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Prendre RDV{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="flex items-center space-x-4">
+        <a href="{{ url_for('main.reminders') }}" class="text-slate-400 hover:text-slate-600">← Retour</a>
+        <h1 class="text-2xl font-bold text-gray-900">Prendre rendez-vous</h1>
+    </div>
+
+    {% if not grouped_slots %}
+    <div class="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 text-center">
+        <div class="w-16 h-16 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i data-lucide="calendar-x" class="w-8 h-8"></i>
+        </div>
+        <p class="text-gray-500 font-bold">Aucun créneau disponible pour le moment.</p>
+        <p class="text-sm text-gray-400 mt-2">Revenez plus tard.</p>
+    </div>
+    {% else %}
+    
+    <form method="POST" action="{{ url_for('main.book_appointment') }}" class="space-y-8">
+        
+        <div class="space-y-6">
+            {% for date_str, data in grouped_slots.items() %}
+            <div>
+                <h3 class="text-lg font-bold text-gray-900 capitalize mb-3 flex items-center gap-2">
+                    <i data-lucide="calendar" class="w-5 h-5 text-gray-400"></i>
+                    {{ data.date_obj.strftime('%A %d %B') }}
+                </h3>
+                
+                <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
+                    {% for slot in data.slots %}
+                    <label class="relative cursor-pointer">
+                        <input type="radio" name="slot_id" value="{{ slot.id }}" class="peer sr-only" required>
+                        <div class="bg-white p-3 rounded-xl border-2 border-transparent shadow-sm hover:shadow-md hover:border-blue-100 peer-checked:bg-blue-600 peer-checked:text-white peer-checked:shadow-blue-200 transition-all text-center">
+                            <span class="block font-bold text-sm">{{ slot.start_time.strftime('%H:%M') }}</span>
+                            <span class="block text-[10px] font-medium opacity-60 mt-0.5 peer-checked:text-white/80">Dr. {{ slot.doctor.patient.last_name }}</span>
+                        </div>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 space-y-4">
+            <h3 class="font-bold text-gray-900">Motif de la consultation</h3>
+            <textarea name="reason" rows="3" placeholder="Ex: Renouvellement ordonnance, fièvre..." class="w-full bg-gray-50 border-none rounded-2xl p-4 focus:ring-2 focus:ring-blue-500 transition-all"></textarea>
+        </div>
+
+        <button type="submit" class="w-full py-4 bg-blue-600 text-white font-bold rounded-2xl shadow-lg shadow-blue-200 hover:bg-blue-700 active:scale-95 transition-all flex items-center justify-center gap-2">
+            Confirmer la demande
+            <i data-lucide="send" class="w-5 h-5"></i>
+        </button>
+
+    </form>
+    
+    {% endif %}
+</div>
+{% endblock %}

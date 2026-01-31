@@ -19,7 +19,7 @@ def create_app(config_class=Config):
     login.init_app(app)
 
     # Blueprint registration - Unified
-    from app.routes.routes import bp as main_bp
+    from app.routes import bp as main_bp
     app.register_blueprint(main_bp)
 
     return app

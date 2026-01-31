@@ -17,6 +17,119 @@
         </div>
     </div>
 
+    <!-- HEALTH TIPS / TRAFFIC LIGHT SYSTEM (CAROUSEL) -->
+    {% if health_tips %}
+    <div class="relative w-full max-w-2xl mx-auto overflow-hidden rounded-2xl" id="tips-container">
+        <!-- Track -->
+        <div class="flex transition-transform duration-700 ease-in-out" id="tips-track">
+            {% for tip in health_tips %}
+            <div class="w-full flex-shrink-0">
+                <div class="bg-white rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-gray-100 overflow-hidden {{ tip.border_class }} border-l-[6px] h-full mx-1">
+                    <div class="p-6">
+                        <!-- Header -->
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-12 h-12 rounded-full {{ tip.bg_class }} {{ tip.text_class }} flex items-center justify-center shrink-0">
+                                <i data-lucide="{{ tip.icon }}" class="w-6 h-6"></i>
+                            </div>
+                            <h3 class="font-bold text-xl text-gray-900">{{ tip.title }}</h3>
+                        </div>
+                        
+                        <!-- Message -->
+                        <p class="{{ tip.text_class }} font-medium text-base mb-5 bg-opacity-10 p-3 rounded-xl {{ tip.bg_class }}">
+                            {{ tip.message }}
+                        </p>
+                        
+                        <!-- Lists -->
+                        {% if tip.to_avoid or tip.to_favor %}
+                        <div class="grid grid-cols-2 gap-6 pt-4 border-t border-gray-50">
+                            {% if tip.to_avoid %}
+                            <div>
+                                <span class="text-[10px] uppercase font-bold text-red-400 tracking-wider mb-2 block">À éviter</span>
+                                <ul class="space-y-2">
+                                    {% for item in tip.to_avoid %}
+                                    <li class="flex items-center gap-2 text-sm font-medium text-gray-600">
+                                        <i data-lucide="x-circle" class="w-4 h-4 text-red-400 shrink-0"></i> {{ item }}
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            {% endif %}
+                            
+                            {% if tip.to_favor %}
+                            <div>
+                                <span class="text-[10px] uppercase font-bold text-emerald-400 tracking-wider mb-2 block">À privilégier</span>
+                                <ul class="space-y-2">
+                                    {% for item in tip.to_favor %}
+                                    <li class="flex items-center gap-2 text-sm font-medium text-gray-600">
+                                        <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400 shrink-0"></i> {{ item }}
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Indicators -->
+        {% if health_tips|length > 1 %}
+        <div class="absolute bottom-4 left-0 right-0 flex justify-center gap-2 z-10">
+            {% for tip in health_tips %}
+            <button class="w-2 h-2 rounded-full bg-gray-300 transition-all duration-300 hover:bg-gray-400 tip-indicator {% if loop.first %}bg-gray-800 w-6{% endif %}" 
+                    onclick="goToSlide({{ loop.index0 }})"></button>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const track = document.getElementById('tips-track');
+            const indicators = document.querySelectorAll('.tip-indicator');
+            const slideCount = {{ health_tips|length }};
+            let currentIndex = 0;
+            let interval;
+
+            function goToSlide(index) {
+                currentIndex = index;
+                const offset = -currentIndex * 100;
+                track.style.transform = `translateX(${offset}%)`;
+                
+                // Update indicators
+                indicators.forEach((ind, i) => {
+                    if (i === currentIndex) {
+                        ind.classList.remove('bg-gray-300', 'w-2');
+                        ind.classList.add('bg-gray-800', 'w-6');
+                    } else {
+                        ind.classList.add('bg-gray-300', 'w-2');
+                        ind.classList.remove('bg-gray-800', 'w-6');
+                    }
+                });
+            }
+
+            function startAutoSlide() {
+                interval = setInterval(() => {
+                    let nextIndex = (currentIndex + 1) % slideCount;
+                    goToSlide(nextIndex);
+                }, 5000); // 5 seconds
+            }
+
+            if (slideCount > 1) {
+                startAutoSlide();
+                
+                // Pause on hover
+                const container = document.getElementById('tips-container');
+                container.addEventListener('mouseenter', () => clearInterval(interval));
+                container.addEventListener('mouseleave', startAutoSlide);
+            }
+        });
+    </script>
+    {% endif %}
+
     <!-- Chart Section -->
     {% if measurements %}
     <div class="bg-white p-6 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
@@ -24,11 +137,11 @@
             <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wide">Évolution</h3>
             
             <!-- Filter Buttons -->
-            <div class="flex bg-gray-50 rounded-xl p-1 gap-1">
-                <button onclick="updateChart('all')" id="btn-all" class="px-3 py-1 text-xs font-bold rounded-lg bg-white text-gray-900 shadow-sm transition-all filter-btn">Tous</button>
-                <button onclick="updateChart('tension')" id="btn-tension" class="px-3 py-1 text-xs font-bold rounded-lg text-gray-500 hover:text-gray-900 transition-all filter-btn">Tension</button>
-                <button onclick="updateChart('glycemie')" id="btn-glycemie" class="px-3 py-1 text-xs font-bold rounded-lg text-gray-500 hover:text-gray-900 transition-all filter-btn">Glycémie</button>
-                <button onclick="updateChart('poids')" id="btn-poids" class="px-3 py-1 text-xs font-bold rounded-lg text-gray-500 hover:text-gray-900 transition-all filter-btn">Poids</button>
+            <div class="flex bg-gray-50 rounded-xl p-1 gap-1 overflow-x-auto max-w-[200px] md:max-w-none no-scrollbar">
+                <button onclick="updateChart('all')" id="btn-all" class="px-3 py-1 text-xs font-bold rounded-lg bg-white text-gray-900 shadow-sm transition-all filter-btn whitespace-nowrap">Tous</button>
+                <button onclick="updateChart('tension')" id="btn-tension" class="px-3 py-1 text-xs font-bold rounded-lg text-gray-500 hover:text-gray-900 transition-all filter-btn whitespace-nowrap">Tension</button>
+                <button onclick="updateChart('glycemie')" id="btn-glycemie" class="px-3 py-1 text-xs font-bold rounded-lg text-gray-500 hover:text-gray-900 transition-all filter-btn whitespace-nowrap">Glycémie</button>
+                <button onclick="updateChart('poids')" id="btn-poids" class="px-3 py-1 text-xs font-bold rounded-lg text-gray-500 hover:text-gray-900 transition-all filter-btn whitespace-nowrap">Poids</button>
             </div>
         </div>
         <div class="h-64 w-full">
