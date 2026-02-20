@@ -37,13 +37,18 @@ Application web de suivi de santé personnel avec double interface patient/méde
     cd MyHealth
     ```
 
+    > **Note Windows** : Utilisez Git Bash, PowerShell ou CMD pour exécuter ces commandes.
+
 2.  **Configurer l'environnement virtuel Python**
-    ```bash
-    # Windows
+
+    **Windows :**
+    ```cmd
     python -m venv venv
     venv\Scripts\activate
+    ```
 
-    # macOS/Linux
+    **macOS/Linux :**
+    ```bash
     python3 -m venv venv
     source venv/bin/activate
     ```
@@ -59,7 +64,27 @@ Application web de suivi de santé personnel avec double interface patient/méde
     ```
 
 5.  **Configuration**
-    Créez un fichier `.env` à la racine du projet (basé sur l'exemple ci-dessous) :
+    Créez un fichier `.env` à la racine du projet :
+
+    **Windows (PowerShell) :**
+    ```powershell
+    New-Item -Path .env -ItemType File
+    notepad .env
+    ```
+
+    **Windows (CMD) :**
+    ```cmd
+    type nul > .env
+    notepad .env
+    ```
+
+    **macOS/Linux :**
+    ```bash
+    touch .env
+    nano .env
+    ```
+
+    Ajoutez-y le contenu suivant :
     ```env
     SECRET_KEY=votre_cle_secrete_tres_longue
     DATABASE_URL=sqlite:///app.db
@@ -68,27 +93,42 @@ Application web de suivi de santé personnel avec double interface patient/méde
 6.  **Initialiser la Base de Données**
     ```bash
     flask db upgrade
-    # Optionnel : Peupler avec des données de test
+    ```
+
+    **Optionnel : Peupler avec des données de test**
+    ```bash
     python seed.py
     ```
 
 ## ▶️ Lancement
 
-1.  **Compiler le CSS (Tailwind)**
+1.  **Activer l'environnement virtuel**
+
+    **Windows :**
+    ```cmd
+    venv\Scripts\activate
+    ```
+
+    **macOS/Linux :**
+    ```bash
+    source venv/bin/activate
+    ```
+
+2.  **Compiler le CSS (Tailwind)**
     ```bash
     # Compilation unique
     npm run build:css
-    
+
     # Ou mode "watch" pour le développement
     npm run watch:css
     ```
 
-2.  **Lancer le serveur Flask**
+3.  **Lancer le serveur Flask**
     ```bash
     python run.py
     ```
 
-3.  Accédez à l'application via `http://localhost:5000`
+4.  Accédez à l'application via `http://localhost:5000`
 
 
 ## 🏗️ Structure du Projet
