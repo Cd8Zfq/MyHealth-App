@@ -32,6 +32,10 @@ def seed_database():
         doctor2.set_password('password123')
         doctors.append(doctor2)
 
+        doctor3 = User(email='isseabdizakaria@gmail.com', role='doctor')
+        doctor3.set_password('password123')
+        doctors.append(doctor3)
+
         db.session.add_all(doctors)
         db.session.commit()
 
@@ -274,6 +278,7 @@ def seed_database():
         print("\n👨‍⚕️ Médecins :")
         print("   - dr.martin@myhealth.fr / password123")
         print("   - dr.dubois@myhealth.fr / password123")
+        print("   - isseabdizakaria@gmail.com / password123")
         print("\n👥 Patients :")
         for patient_data in patients_data:
             print(f"   - {patient_data['email']} / password123")
