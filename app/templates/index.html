@@ -1,88 +1,425 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="fr" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyHealth - Votre Compagnon Santé Personnel</title>
+    <meta name="description" content="Application de suivi de santé personnel. Gérez votre tension, glycémie et poids en toute simplicité.">
 
-{% block title %}MyHealth - Votre Compagnon Santé{% endblock %}
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-{% block content %}
-<div class="space-y-16 py-10">
-    
-    <!-- Hero Section -->
-    <section class="text-center space-y-6">
-        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-100 text-primary text-xs font-semibold animate-fade-in">
-            <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-            Application certifiée
-        </div>
-        
-        <h1 class="text-4xl sm:text-5xl font-bold tracking-tight text-slate-900 leading-tight">
-            Prenez soin de vous,<br class="md:hidden">
-            <span class="text-primary">en toute simplicité.</span>
-        </h1>
-        
-        <p class="text-lg text-slate-500 max-w-xl mx-auto leading-relaxed">
-            Suivi médical intuitif, sécurisé et conçu pour vous. Connectez vos appareils ou saisissez vos mesures manuellement.
-        </p>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/output.css') }}">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-bg-page text-slate-900 font-sans antialiased">
 
-        <div class="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-            {% if current_user.is_authenticated %}
-                <a href="{{ url_for('main.home') }}" class="flex items-center justify-center gap-2 bg-primary text-white px-6 py-4 rounded-xl font-bold shadow-md shadow-blue-200 hover:bg-blue-700 transition active:scale-95">
-                    Accéder à mon tableau de bord
-                    <i data-lucide="arrow-right" class="w-4 h-4"></i>
+    <!-- Header Navigation -->
+    <header class="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-lg border-b border-slate-200/60 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16 md:h-20">
+                <!-- Logo -->
+                <a href="{{ url_for('main.index') }}" class="flex items-center gap-3 group">
+                    <div class="bg-gradient-to-br from-blue-600 to-blue-700 text-white p-2 rounded-xl shadow-lg shadow-blue-200 group-hover:shadow-blue-300 transition-all">
+                        <i data-lucide="heart-pulse" class="w-5 h-5 md:w-6 md:h-6"></i>
+                    </div>
+                    <span class="font-extrabold text-lg md:text-xl bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">MyHealth</span>
                 </a>
-            {% else %}
-                <a href="{{ url_for('main.register') }}" class="flex items-center justify-center gap-2 bg-primary text-white px-6 py-4 rounded-xl font-bold shadow-md shadow-blue-200 hover:bg-blue-700 transition active:scale-95">
+
+                <!-- Desktop Navigation -->
+                <nav class="hidden md:flex items-center gap-8">
+                    <a href="#features" class="text-sm font-semibold text-slate-600 hover:text-blue-600 transition-colors">Fonctionnalités</a>
+                    <a href="#for-patients" class="text-sm font-semibold text-slate-600 hover:text-blue-600 transition-colors">Patients</a>
+                    <a href="#for-doctors" class="text-sm font-semibold text-slate-600 hover:text-blue-600 transition-colors">Médecins</a>
+                    {% if current_user.is_authenticated %}
+                        <a href="{{ url_for('main.home') }}" class="px-5 py-2.5 bg-blue-600 text-white text-sm font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-200">
+                            Mon Espace
+                        </a>
+                    {% else %}
+                        <a href="{{ url_for('main.login') }}" class="text-sm font-semibold text-slate-600 hover:text-blue-600 transition-colors">Connexion</a>
+                        <a href="{{ url_for('main.register') }}" class="px-5 py-2.5 bg-blue-600 text-white text-sm font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-200">
+                            Commencer
+                        </a>
+                    {% endif %}
+                </nav>
+
+                <!-- Mobile Menu Button -->
+                <button id="mobile-menu-btn" class="md:hidden p-2 rounded-lg hover:bg-slate-100 transition-colors">
+                    <i data-lucide="menu" class="w-6 h-6 text-slate-700"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-slate-200">
+            <div class="px-4 py-4 space-y-3">
+                <a href="#features" class="block px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50 rounded-lg transition-colors">Fonctionnalités</a>
+                <a href="#for-patients" class="block px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50 rounded-lg transition-colors">Patients</a>
+                <a href="#for-doctors" class="block px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50 rounded-lg transition-colors">Médecins</a>
+                {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('main.home') }}" class="block px-4 py-3 bg-blue-600 text-white text-sm font-bold rounded-xl text-center">Mon Espace</a>
+                {% else %}
+                    <a href="{{ url_for('main.login') }}" class="block px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50 rounded-lg transition-colors">Connexion</a>
+                    <a href="{{ url_for('main.register') }}" class="block px-4 py-3 bg-blue-600 text-white text-sm font-bold rounded-xl text-center">Commencer Gratuitement</a>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="pt-16 md:pt-20">
+        <!-- Hero Section -->
+        <section class="relative overflow-hidden bg-white">
+            <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 lg:py-32">
+                <div class="text-center space-y-8">
+                    <!-- Badge -->
+                    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-xs font-bold">
+                        <i data-lucide="sparkles" class="w-4 h-4"></i>
+                        Application certifiée & sécurisée
+                    </div>
+
+                    <!-- Title -->
+                    <h1 class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight text-slate-900 leading-tight max-w-4xl mx-auto">
+                        Prenez soin de votre santé,
+                        <span class="bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">en toute simplicité</span>
+                    </h1>
+
+                    <!-- Description -->
+                    <p class="text-lg md:text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed">
+                        Suivi médical intuitif et sécurisé. Gérez vos constantes vitales, recevez des conseils personnalisés et partagez vos données avec votre médecin.
+                    </p>
+
+                    <!-- CTA Buttons -->
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center pt-4">
+                        {% if current_user.is_authenticated %}
+                            <a href="{{ url_for('main.home') }}" class="group flex items-center justify-center gap-2 bg-blue-600 text-white px-8 py-4 rounded-xl font-bold shadow-xl shadow-blue-200 hover:bg-blue-700 transition-all hover:scale-105">
+                                Accéder à mon espace
+                                <i data-lucide="arrow-right" class="w-5 h-5 group-hover:translate-x-1 transition-transform"></i>
+                            </a>
+                        {% else %}
+                            <a href="{{ url_for('main.register') }}" class="group flex items-center justify-center gap-2 bg-blue-600 text-white px-8 py-4 rounded-xl font-bold shadow-xl shadow-blue-200 hover:bg-blue-700 transition-all hover:scale-105">
+                                Commencer gratuitement
+                                <i data-lucide="arrow-right" class="w-5 h-5 group-hover:translate-x-1 transition-transform"></i>
+                            </a>
+                            <a href="{{ url_for('main.login') }}" class="flex items-center justify-center gap-2 bg-white text-slate-700 border-2 border-slate-200 px-8 py-4 rounded-xl font-bold hover:bg-slate-50 hover:border-slate-300 transition-all">
+                                Se connecter
+                            </a>
+                        {% endif %}
+                    </div>
+
+                    <!-- Trust Badges -->
+                    <div class="flex flex-wrap items-center justify-center gap-8 pt-8 text-sm text-slate-500">
+                        <span class="flex items-center gap-2">
+                            <i data-lucide="shield-check" class="w-5 h-5 text-green-600"></i>
+                            <span class="font-semibold">Données cryptées</span>
+                        </span>
+                        <span class="flex items-center gap-2">
+                            <i data-lucide="lock" class="w-5 h-5 text-blue-600"></i>
+                            <span class="font-semibold">RGPD conforme</span>
+                        </span>
+                        <span class="flex items-center gap-2">
+                            <i data-lucide="heart" class="w-5 h-5 text-red-600"></i>
+                            <span class="font-semibold">Gratuit</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Hero Dashboard Preview -->
+        <section class="py-8 md:py-12">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="relative rounded-2xl overflow-hidden shadow-2xl border border-slate-200 bg-white">
+                    <img src="{{ url_for('static', filename='images/hero-dashboard.svg') }}"
+                         alt="Dashboard MyHealth"
+                         class="w-full h-auto hover:scale-105 transition-transform duration-700">
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section id="features" class="py-16 md:py-24 bg-white relative overflow-hidden">
+            <!-- Background pattern -->
+            <div class="absolute inset-0 opacity-30">
+                <img src="{{ url_for('static', filename='images/features-bg.svg') }}"
+                     alt=""
+                     class="w-full h-full object-cover">
+            </div>
+
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                <div class="text-center mb-16">
+                    <h2 class="text-3xl md:text-4xl font-extrabold text-slate-900 mb-4">Tout ce dont vous avez besoin</h2>
+                    <p class="text-lg text-slate-600 max-w-2xl mx-auto">Des fonctionnalités pensées pour simplifier votre suivi médical au quotidien</p>
+                </div>
+
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- Feature 1 -->
+                    <div class="group bg-gradient-to-br from-blue-50 to-white p-8 rounded-2xl border border-blue-100 hover:shadow-xl hover:scale-105 transition-all duration-300">
+                        <div class="w-14 h-14 bg-blue-600 rounded-xl flex items-center justify-center text-white mb-6 group-hover:scale-110 transition-transform">
+                            <i data-lucide="activity" class="w-7 h-7"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-900 mb-3">Suivi complet</h3>
+                        <p class="text-slate-600 leading-relaxed">Tension artérielle, glycémie, poids. Toutes vos constantes vitales centralisées et analysées.</p>
+                    </div>
+
+                    <!-- Feature 2 -->
+                    <div class="group bg-gradient-to-br from-green-50 to-white p-8 rounded-2xl border border-green-100 hover:shadow-xl hover:scale-105 transition-all duration-300">
+                        <div class="w-14 h-14 bg-green-600 rounded-xl flex items-center justify-center text-white mb-6 group-hover:scale-110 transition-transform">
+                            <i data-lucide="line-chart" class="w-7 h-7"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-900 mb-3">Graphiques intelligents</h3>
+                        <p class="text-slate-600 leading-relaxed">Visualisez l'évolution de vos mesures avec des graphiques clairs et interactifs.</p>
+                    </div>
+
+                    <!-- Feature 3 -->
+                    <div class="group bg-gradient-to-br from-purple-50 to-white p-8 rounded-2xl border border-purple-100 hover:shadow-xl hover:scale-105 transition-all duration-300">
+                        <div class="w-14 h-14 bg-purple-600 rounded-xl flex items-center justify-center text-white mb-6 group-hover:scale-110 transition-transform">
+                            <i data-lucide="file-text" class="w-7 h-7"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-900 mb-3">Export PDF & Excel</h3>
+                        <p class="text-slate-600 leading-relaxed">Partagez facilement vos rapports de santé avec votre médecin traitant.</p>
+                    </div>
+
+                    <!-- Feature 4 -->
+                    <div class="group bg-gradient-to-br from-amber-50 to-white p-8 rounded-2xl border border-amber-100 hover:shadow-xl hover:scale-105 transition-all duration-300">
+                        <div class="w-14 h-14 bg-amber-600 rounded-xl flex items-center justify-center text-white mb-6 group-hover:scale-110 transition-transform">
+                            <i data-lucide="bell" class="w-7 h-7"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-900 mb-3">Rappels intelligents</h3>
+                        <p class="text-slate-600 leading-relaxed">Ne manquez jamais une prise de mesure ou un médicament avec nos rappels personnalisés.</p>
+                    </div>
+
+                    <!-- Feature 5 -->
+                    <div class="group bg-gradient-to-br from-rose-50 to-white p-8 rounded-2xl border border-rose-100 hover:shadow-xl hover:scale-105 transition-all duration-300">
+                        <div class="w-14 h-14 bg-rose-600 rounded-xl flex items-center justify-center text-white mb-6 group-hover:scale-110 transition-transform">
+                            <i data-lucide="lightbulb" class="w-7 h-7"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-900 mb-3">Conseils personnalisés</h3>
+                        <p class="text-slate-600 leading-relaxed">Recevez des recommandations santé basées sur vos mesures et votre profil.</p>
+                    </div>
+
+                    <!-- Feature 6 -->
+                    <div class="group bg-gradient-to-br from-cyan-50 to-white p-8 rounded-2xl border border-cyan-100 hover:shadow-xl hover:scale-105 transition-all duration-300">
+                        <div class="w-14 h-14 bg-cyan-600 rounded-xl flex items-center justify-center text-white mb-6 group-hover:scale-110 transition-transform">
+                            <i data-lucide="calendar-check" class="w-7 h-7"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-900 mb-3">Rendez-vous médicaux</h3>
+                        <p class="text-slate-600 leading-relaxed">Prenez rendez-vous directement avec votre médecin depuis l'application.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- For Patients Section -->
+        <section id="for-patients" class="py-16 md:py-24 bg-bg-page">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="grid md:grid-cols-2 gap-12 items-center">
+                    <div class="space-y-6">
+                        <div class="inline-block px-4 py-2 bg-blue-100 text-blue-700 rounded-full text-sm font-bold">Pour les Patients</div>
+                        <h2 class="text-3xl md:text-4xl font-extrabold text-slate-900">Votre santé, simplifiée</h2>
+                        <p class="text-lg text-slate-600 leading-relaxed">
+                            Suivez vos constantes vitales, recevez des alertes en cas d'anomalie, et partagez vos données avec votre médecin en un clic.
+                        </p>
+                        <ul class="space-y-4">
+                            <li class="flex items-start gap-3">
+                                <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center shrink-0 mt-0.5">
+                                    <i data-lucide="check" class="w-4 h-4 text-green-600"></i>
+                                </div>
+                                <span class="text-slate-700"><strong>Saisie rapide</strong> : Enregistrez vos mesures en quelques secondes</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center shrink-0 mt-0.5">
+                                    <i data-lucide="check" class="w-4 h-4 text-green-600"></i>
+                                </div>
+                                <span class="text-slate-700"><strong>Historique détaillé</strong> : Consultez l'évolution de vos données sur plusieurs mois</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center shrink-0 mt-0.5">
+                                    <i data-lucide="check" class="w-4 h-4 text-green-600"></i>
+                                </div>
+                                <span class="text-slate-700"><strong>Alertes intelligentes</strong> : Soyez prévenu en cas de valeurs anormales</span>
+                            </li>
+                        </ul>
+                        {% if not current_user.is_authenticated %}
+                        <a href="{{ url_for('main.register') }}" class="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all">
+                            Créer mon compte patient
+                            <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                        </a>
+                        {% endif %}
+                    </div>
+                    <div class="relative">
+                        <img src="{{ url_for('static', filename='images/patient-illustration.svg') }}"
+                             alt="Interface Patient"
+                             class="w-full h-auto rounded-2xl shadow-2xl hover:scale-105 transition-transform duration-500">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- For Doctors Section -->
+        <section id="for-doctors" class="py-16 md:py-24 bg-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="grid md:grid-cols-2 gap-12 items-center">
+                    <div class="order-2 md:order-1 relative">
+                        <img src="{{ url_for('static', filename='images/doctor-illustration.svg') }}"
+                             alt="Dashboard Médecin"
+                             class="w-full h-auto rounded-2xl shadow-2xl hover:scale-105 transition-transform duration-500">
+                    </div>
+                    <div class="order-1 md:order-2 space-y-6">
+                        <div class="inline-block px-4 py-2 bg-purple-100 text-purple-700 rounded-full text-sm font-bold">Pour les Médecins</div>
+                        <h2 class="text-3xl md:text-4xl font-extrabold text-slate-900">Suivez vos patients efficacement</h2>
+                        <p class="text-lg text-slate-600 leading-relaxed">
+                            Dashboard médecin complet avec alertes prioritaires, agenda intelligent et accès à l'historique détaillé de chaque patient.
+                        </p>
+                        <ul class="space-y-4">
+                            <li class="flex items-start gap-3">
+                                <div class="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center shrink-0 mt-0.5">
+                                    <i data-lucide="check" class="w-4 h-4 text-purple-600"></i>
+                                </div>
+                                <span class="text-slate-700"><strong>Dashboard médecin</strong> : Vue d'ensemble de tous vos patients</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <div class="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center shrink-0 mt-0.5">
+                                    <i data-lucide="check" class="w-4 h-4 text-purple-600"></i>
+                                </div>
+                                <span class="text-slate-700"><strong>Agenda intégré</strong> : Gérez vos consultations (cabinet, visio, domicile)</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <div class="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center shrink-0 mt-0.5">
+                                    <i data-lucide="check" class="w-4 h-4 text-purple-600"></i>
+                                </div>
+                                <span class="text-slate-700"><strong>Alertes automatiques</strong> : Soyez notifié des mesures anormales</span>
+                            </li>
+                        </ul>
+                        {% if not current_user.is_authenticated %}
+                        <a href="{{ url_for('main.register') }}" class="inline-flex items-center gap-2 bg-purple-600 text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-purple-200 hover:bg-purple-700 transition-all">
+                            Créer mon compte médecin
+                            <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA Section -->
+        <section class="py-16 md:py-24 bg-gradient-to-br from-blue-600 to-blue-800 text-white">
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-8">
+                <h2 class="text-3xl md:text-5xl font-extrabold">Prêt à prendre soin de votre santé ?</h2>
+                <p class="text-lg md:text-xl text-blue-100 max-w-2xl mx-auto">
+                    Rejoignez des milliers d'utilisateurs qui font confiance à MyHealth pour leur suivi médical quotidien.
+                </p>
+                {% if not current_user.is_authenticated %}
+                <a href="{{ url_for('main.register') }}" class="inline-flex items-center gap-2 bg-white text-blue-600 px-8 py-4 rounded-xl font-bold shadow-xl hover:bg-blue-50 transition-all hover:scale-105">
                     Commencer gratuitement
-                    <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    <i data-lucide="arrow-right" class="w-5 h-5"></i>
                 </a>
-                <a href="{{ url_for('main.login') }}" class="flex items-center justify-center gap-2 bg-white text-slate-700 border border-slate-200 px-6 py-4 rounded-xl font-bold hover:bg-slate-50 transition active:scale-95">
-                    Se connecter
+                {% else %}
+                <a href="{{ url_for('main.home') }}" class="inline-flex items-center gap-2 bg-white text-blue-600 px-8 py-4 rounded-xl font-bold shadow-xl hover:bg-blue-50 transition-all hover:scale-105">
+                    Accéder à mon espace
+                    <i data-lucide="arrow-right" class="w-5 h-5"></i>
                 </a>
-            {% endif %}
-        </div>
-        
-        <div class="flex items-center justify-center gap-6 pt-6 text-sm text-slate-400 font-medium">
-            <span class="flex items-center gap-1.5"><i data-lucide="shield-check" class="w-4 h-4 text-primary"></i> 100% Sécurisé</span>
-            <span class="flex items-center gap-1.5"><i data-lucide="thumbs-up" class="w-4 h-4 text-primary"></i> Simple</span>
-        </div>
-    </section>
+                {% endif %}
+            </div>
+        </section>
+    </main>
 
-    <!-- Visual Demo -->
-    <div class="relative rounded-2xl overflow-hidden shadow-2xl border border-slate-200 bg-white">
-        <img src="{{ url_for('static', filename='images/hero-image.jpg') }}" 
-             alt="Interface application" 
-             class="w-full h-64 sm:h-80 object-cover object-center opacity-90 hover:scale-105 transition duration-700">
-        <div class="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent flex items-end p-6">
-            <div class="text-white">
-                <p class="font-bold text-lg">Tableau de bord clair</p>
-                <p class="text-sm text-slate-200">Vos constantes vitales en un coup d'œil.</p>
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-12">
+                <!-- Brand -->
+                <div class="space-y-4">
+                    <div class="flex items-center gap-3">
+                        <div class="bg-blue-600 text-white p-2 rounded-xl">
+                            <i data-lucide="heart-pulse" class="w-6 h-6"></i>
+                        </div>
+                        <span class="font-extrabold text-xl text-white">MyHealth</span>
+                    </div>
+                    <p class="text-sm text-slate-400 leading-relaxed">
+                        Votre compagnon santé personnel pour un suivi médical simplifié et sécurisé.
+                    </p>
+                </div>
+
+                <!-- Product -->
+                <div>
+                    <h3 class="font-bold text-white mb-4">Produit</h3>
+                    <ul class="space-y-3 text-sm">
+                        <li><a href="#features" class="hover:text-white transition-colors">Fonctionnalités</a></li>
+                        <li><a href="#for-patients" class="hover:text-white transition-colors">Pour les patients</a></li>
+                        <li><a href="#for-doctors" class="hover:text-white transition-colors">Pour les médecins</a></li>
+                    </ul>
+                </div>
+
+                <!-- Company -->
+                <div>
+                    <h3 class="font-bold text-white mb-4">Entreprise</h3>
+                    <ul class="space-y-3 text-sm">
+                        <li><a href="#" class="hover:text-white transition-colors">À propos</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Confidentialité</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Conditions d'utilisation</a></li>
+                    </ul>
+                </div>
+
+                <!-- Support -->
+                <div>
+                    <h3 class="font-bold text-white mb-4">Support</h3>
+                    <ul class="space-y-3 text-sm">
+                        <li><a href="#" class="hover:text-white transition-colors">Centre d'aide</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Contact</a></li>
+                        <li><a href="https://github.com/Cd8Zfq/MyHealth-App" target="_blank" class="hover:text-white transition-colors flex items-center gap-2">
+                            GitHub
+                            <i data-lucide="external-link" class="w-3 h-3"></i>
+                        </a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Bottom -->
+            <div class="border-t border-slate-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+                <p class="text-sm text-slate-400">© 2024 MyHealth. Tous droits réservés.</p>
+                <div class="flex items-center gap-4">
+                    <span class="flex items-center gap-2 text-sm">
+                        <i data-lucide="shield-check" class="w-4 h-4 text-green-500"></i>
+                        <span class="text-slate-400">Données sécurisées</span>
+                    </span>
+                    <span class="flex items-center gap-2 text-sm">
+                        <i data-lucide="lock" class="w-4 h-4 text-blue-500"></i>
+                        <span class="text-slate-400">RGPD</span>
+                    </span>
+                </div>
             </div>
         </div>
-    </div>
+    </footer>
 
-    <!-- Features Grid -->
-    <section class="grid md:grid-cols-3 gap-6">
-        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm hover:border-blue-100 transition duration-300">
-            <div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center text-primary mb-4">
-                <i data-lucide="activity" class="w-5 h-5"></i>
-            </div>
-            <h3 class="text-base font-bold text-slate-900 mb-2">Suivi complet</h3>
-            <p class="text-sm text-slate-500 leading-relaxed">Tension, glycémie, poids. Toutes vos données centralisées.</p>
-        </div>
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
 
-        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm hover:border-green-100 transition duration-300">
-            <div class="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center text-success mb-4">
-                <i data-lucide="share-2" class="w-5 h-5"></i>
-            </div>
-            <h3 class="text-base font-bold text-slate-900 mb-2">Partage facile</h3>
-            <p class="text-sm text-slate-500 leading-relaxed">Exportez vos rapports PDF/Excel pour votre médecin.</p>
-        </div>
+        // Mobile menu toggle
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
 
-        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm hover:border-amber-100 transition duration-300">
-            <div class="w-10 h-10 bg-amber-50 rounded-lg flex items-center justify-center text-warning mb-4">
-                <i data-lucide="bell" class="w-5 h-5"></i>
-            </div>
-            <h3 class="text-base font-bold text-slate-900 mb-2">Rappels</h3>
-            <p class="text-sm text-slate-500 leading-relaxed">Ne manquez jamais une prise de mesure importante.</p>
-        </div>
-    </section>
+        if (mobileMenuBtn && mobileMenu) {
+            mobileMenuBtn.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+        }
 
-</div>
-{% endblock %}
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    // Close mobile menu if open
+                    if (mobileMenu) mobileMenu.classList.add('hidden');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

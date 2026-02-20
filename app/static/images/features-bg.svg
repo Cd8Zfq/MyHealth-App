@@ -1,0 +1,36 @@
+<svg width="1200" height="800" viewBox="0 0 1200 800" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Abstract background pattern for features section -->
+  <defs>
+    <linearGradient id="bgGrad1" x1="0" y1="0" x2="1200" y2="800">
+      <stop offset="0%" style="stop-color:#EFF6FF;stop-opacity:0.5" />
+      <stop offset="100%" style="stop-color:#F0F9FF;stop-opacity:0.3" />
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="800" fill="url(#bgGrad1)"/>
+
+  <!-- Floating circles -->
+  <circle cx="100" cy="100" r="60" fill="#3B82F6" fill-opacity="0.05"/>
+  <circle cx="1100" cy="150" r="80" fill="#10B981" fill-opacity="0.05"/>
+  <circle cx="200" cy="600" r="100" fill="#7C3AED" fill-opacity="0.05"/>
+  <circle cx="1000" cy="700" r="70" fill="#F59E0B" fill-opacity="0.05"/>
+
+  <!-- Medical cross patterns -->
+  <g opacity="0.03">
+    <path d="M 300 200 L 300 260 M 270 230 L 330 230" stroke="#3B82F6" stroke-width="8" stroke-linecap="round"/>
+    <path d="M 900 500 L 900 560 M 870 530 L 930 530" stroke="#10B981" stroke-width="8" stroke-linecap="round"/>
+  </g>
+
+  <!-- Wave patterns -->
+  <path d="M 0 400 Q 200 350, 400 400 T 800 400 T 1200 400"
+        stroke="#3B82F6"
+        stroke-width="2"
+        fill="none"
+        opacity="0.05"/>
+
+  <path d="M 0 450 Q 250 420, 500 450 T 1000 450 T 1200 450"
+        stroke="#10B981"
+        stroke-width="2"
+        fill="none"
+        opacity="0.05"/>
+</svg>
