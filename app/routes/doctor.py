@@ -91,12 +91,15 @@ def agenda():
         if 0 <= total_minutes <= 660:
             now_offset_percent = (total_minutes / 660) * 100
 
-    return render_template('doctor/agenda.html', 
-                           current_date=current_date, 
-                           week_days=week_days, 
+    cabinet_address = current_user.patient.address if current_user.patient else ''
+
+    return render_template('doctor/agenda.html',
+                           current_date=current_date,
+                           week_days=week_days,
                            appointments=appointments,
                            now_offset_percent=now_offset_percent,
-                           is_today=is_today)
+                           is_today=is_today,
+                           cabinet_address=cabinet_address or '')
 
 @bp.route('/appointment/<int:id>/accept')
 @login_required
@@ -150,19 +153,28 @@ def create_slot():
         end_dt = start_dt + timedelta(minutes=30)
         duration = 30
     
+    slot_type = request.form.get('type', 'cabinet')
+    if slot_type not in ('cabinet', 'visio'):
+        slot_type = 'cabinet'
+
+    video_link = request.form.get('video_link', '').strip() or None
+    if slot_type != 'visio':
+        video_link = None
+
     # Create a free slot
     slot = Appointment(
         doctor_id=current_user.id,
-        patient_id=None, # No patient yet
+        patient_id=None,
         start_time=start_dt,
         end_time=end_dt,
         duration=duration,
         status='free',
-        type='cabinet' # Default
+        type=slot_type,
+        video_link=video_link
     )
     db.session.add(slot)
     db.session.commit()
-    
+
     flash('Créneau libre ajouté.', 'success')
     return redirect(url_for('main.agenda', date=date_str))
 

@@ -55,11 +55,12 @@ class Measurement(db.Model):
     def is_alert(self):
         """
         Checks if the measurement should trigger a doctor alert.
-        Thresholds: Tension > 140/90, Glycemie > 180.
+        Thresholds: Tension > 140/90, Glycemie > 180, Poids > 130 kg.
         """
         if self.type == 'tension':
-            # Keeping strict > 140 to match original doctor dashboard logic
             return self.value1 > 140 or (self.value2 and self.value2 > 90)
         elif self.type == 'glycemie':
             return self.value1 > 180
+        elif self.type == 'poids':
+            return self.value1 > 130
         return False
