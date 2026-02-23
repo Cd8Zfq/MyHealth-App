@@ -1,28 +1,28 @@
 {% extends "base.html" %}
 
-{% block title %}Tableau de bord{% endblock %}
+{% block title %}{{ t('list_title') }}{% endblock %}
 
 {% block content %}
 <div class="max-w-md mx-auto md:max-w-4xl md:mt-8">
-    
-    <!-- Header Section (Desktop) -->
+
+    <!-- Desktop Header -->
     <div class="hidden md:flex justify-between items-center mb-8">
         <div>
-            <h1 class="text-3xl font-extrabold text-mainText">Bonjour, {{ current_user.email.split('@')[0]|capitalize }}</h1>
-            <p class="text-mutedText text-base font-medium mt-1">Voici un aperçu de votre santé aujourd'hui.</p>
+            <h1 class="text-3xl font-extrabold text-mainText">{{ t('dash_hello') }} {{ current_user.email.split('@')[0]|capitalize }}</h1>
+            <p class="text-mutedText text-base font-medium mt-1">{{ t('list_subtitle') }}</p>
         </div>
         <div class="flex space-x-2">
-             <a href="{{ url_for('main.export_pdf') }}" class="text-sm font-bold px-5 py-2.5 bg-white border-2 border-orange-50 rounded-2xl text-mutedText hover:bg-orange-50 hover:text-warmBlue transition-colors flex items-center gap-2">
+            <a href="{{ url_for('main.export_pdf') }}" class="text-sm font-bold px-5 py-2.5 bg-white border-2 border-orange-50 rounded-2xl text-mutedText hover:bg-orange-50 hover:text-warmBlue transition-colors flex items-center gap-2">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                Exporter PDF
+                {{ t('list_export_pdf') }}
             </a>
         </div>
     </div>
 
     <!-- Mobile Header -->
     <div class="md:hidden mb-6 px-2">
-        <h1 class="text-2xl font-bold text-mainText">Tableau de bord</h1>
-        <p class="text-mutedText text-sm mt-1 font-medium">Suivi de vos constantes vitales</p>
+        <h1 class="text-2xl font-bold text-mainText">{{ t('list_title') }}</h1>
+        <p class="text-mutedText text-sm mt-1 font-medium">{{ t('list_tracking') }}</p>
     </div>
 
     <!-- Latest Value Highlight Card -->
@@ -30,7 +30,6 @@
     <div class="bg-white rounded-[2rem] shadow-xl shadow-blue-100 p-8 mb-8 border border-white relative overflow-hidden">
         <div class="absolute top-0 right-0 w-32 h-32 bg-warmBlueLight rounded-bl-[4rem] -mr-8 -mt-8 opacity-50"></div>
         <div class="absolute bottom-0 left-0 w-24 h-24 bg-softOrange/20 rounded-tr-[3rem] -ml-6 -mb-6 opacity-50"></div>
-        
         <div class="relative z-10">
             <div class="flex items-center gap-3 mb-2">
                 <div class="bg-warmBlue/10 p-2 rounded-xl text-warmBlue">
@@ -42,32 +41,26 @@
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" /></svg>
                     {% endif %}
                 </div>
-                <p class="text-sm font-bold text-mutedText uppercase tracking-wide">Dernière mesure • {{ latest.type|capitalize }}</p>
+                <p class="text-sm font-bold text-mutedText uppercase tracking-wide">{{ t('list_last_meas') }} {{ tm(latest.type) }}</p>
             </div>
-            
             <div class="flex items-baseline mt-4">
                 <span class="text-5xl font-extrabold text-mainText tracking-tight">
                     {{ latest.value1 }}{% if latest.value2 %}<span class="text-3xl text-slate-400 font-bold">/{{ latest.value2 }}</span>{% endif %}
                 </span>
                 <span class="ml-2 text-lg font-bold text-slate-400 mb-1">{{ latest.unit }}</span>
             </div>
-
             <div class="mt-6 flex items-center justify-between">
                 <div class="flex items-center space-x-3">
-                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold border 
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold border
                         {% if 'red' in latest.status_color %}bg-red-50 text-red-600 border-red-100{% elif 'amber' in latest.status_color %}bg-orange-50 text-orange-600 border-orange-100{% else %}bg-green-50 text-green-600 border-green-100{% endif %}">
                         <span class="w-2 h-2 rounded-full mr-2 {% if 'red' in latest.status_color %}bg-red-500{% elif 'amber' in latest.status_color %}bg-orange-500{% else %}bg-green-500{% endif %}"></span>
-                        {% if 'red' in latest.status_color %}Alerte{% elif 'amber' in latest.status_color %}À surveiller{% else %}Normal{% endif %}
+                        {% if 'red' in latest.status_color %}{{ t('list_alert') }}{% elif 'amber' in latest.status_color %}{{ t('status_watch') }}{% else %}{{ t('list_normal') }}{% endif %}
                     </span>
                     <span class="text-xs font-bold text-slate-400">{{ latest.date.strftime('%d %b à %H:%M') }}</span>
                 </div>
             </div>
-            
-            <!-- Mini Chart Area -->
             {% if chart_data_json != '[]' %}
-            <div class="mt-8 h-24 w-full">
-                <canvas id="miniChart"></canvas>
-            </div>
+            <div class="mt-8 h-24 w-full"><canvas id="miniChart"></canvas></div>
             {% endif %}
         </div>
     </div>
@@ -76,22 +69,22 @@
     <!-- Quick Filters -->
     <div class="flex space-x-3 mb-8 overflow-x-auto pb-2 scrollbar-hide px-1">
         <a href="{{ url_for('main.list_measurements') }}" class="flex-shrink-0 px-5 py-2.5 rounded-2xl text-sm font-bold transition-all {% if not m_type %}bg-mainText text-white shadow-lg shadow-slate-200 transform scale-105{% else %}bg-white text-mutedText border-2 border-orange-50 hover:border-warmBlueLight hover:text-warmBlue{% endif %}">
-            Tout voir
+            {{ t('list_see_all') }}
         </a>
         <a href="{{ url_for('main.list_measurements', type='tension') }}" class="flex-shrink-0 px-5 py-2.5 rounded-2xl text-sm font-bold transition-all {% if m_type == 'tension' %}bg-warmBlue text-white shadow-lg shadow-blue-200 transform scale-105{% else %}bg-white text-mutedText border-2 border-orange-50 hover:border-warmBlueLight hover:text-warmBlue{% endif %}">
-            Tension
+            {{ t('type_tension') }}
         </a>
         <a href="{{ url_for('main.list_measurements', type='glycemie') }}" class="flex-shrink-0 px-5 py-2.5 rounded-2xl text-sm font-bold transition-all {% if m_type == 'glycemie' %}bg-warmBlue text-white shadow-lg shadow-blue-200 transform scale-105{% else %}bg-white text-mutedText border-2 border-orange-50 hover:border-warmBlueLight hover:text-warmBlue{% endif %}">
-            Glycémie
+            {{ t('type_glycemie') }}
         </a>
         <a href="{{ url_for('main.list_measurements', type='poids') }}" class="flex-shrink-0 px-5 py-2.5 rounded-2xl text-sm font-bold transition-all {% if m_type == 'poids' %}bg-warmBlue text-white shadow-lg shadow-blue-200 transform scale-105{% else %}bg-white text-mutedText border-2 border-orange-50 hover:border-warmBlueLight hover:text-warmBlue{% endif %}">
-            Poids
+            {{ t('type_poids') }}
         </a>
     </div>
 
     <!-- History List -->
     <div class="space-y-4">
-        <h3 class="text-sm font-bold text-mutedText uppercase tracking-wider mb-4 px-1 ml-1">Historique récent</h3>
+        <h3 class="text-sm font-bold text-mutedText uppercase tracking-wider mb-4 px-1 ml-1">{{ t('list_recent') }}</h3>
         {% for m in measurements %}
         <div class="bg-white p-5 rounded-3xl shadow-sm border border-orange-50 flex justify-between items-center group hover:shadow-md hover:border-orange-100 transition-all cursor-default">
             <div class="flex items-center space-x-5">
@@ -106,7 +99,7 @@
                     {% endif %}
                 </div>
                 <div>
-                    <p class="text-base font-bold text-mainText capitalize">{{ m.type }}</p>
+                    <p class="text-base font-bold text-mainText">{{ tm(m.type) }}</p>
                     <p class="text-xs font-bold text-slate-400">{{ m.date.strftime('%d %b %H:%M') }}</p>
                 </div>
             </div>
@@ -124,10 +117,10 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 011.414.586l4 4a1 1 0 01.586 1.414V19a2 2 0 01-2 2z" />
                 </svg>
             </div>
-            <h3 class="text-lg font-bold text-mainText">Aucune mesure</h3>
-            <p class="mt-1 text-sm text-mutedText mb-6">Commencez par ajouter votre première mesure.</p>
+            <h3 class="text-lg font-bold text-mainText">{{ t('list_no_meas') }}</h3>
+            <p class="mt-1 text-sm text-mutedText mb-6">{{ t('dash_first_meas') }}</p>
             <a href="{{ url_for('main.add_measurement') }}" class="bg-softGreen hover:bg-green-600 text-white px-6 py-3 rounded-2xl font-bold shadow-lg shadow-green-100 transition-transform hover:-translate-y-1">
-                Commencer maintenant
+                {{ t('list_start') }}
             </a>
         </div>
         {% endfor %}
@@ -138,40 +131,13 @@
 <script>
     const ctx = document.getElementById('miniChart').getContext('2d');
     const data = {{ chart_data_json|safe }};
-    
-    // Gradient matching Warm Theme
     const gradient = ctx.createLinearGradient(0, 0, 0, 100);
-    gradient.addColorStop(0, 'rgba(37, 99, 235, 0.2)'); // warmBlue
+    gradient.addColorStop(0, 'rgba(37, 99, 235, 0.2)');
     gradient.addColorStop(1, 'rgba(37, 99, 235, 0)');
-
     new Chart(ctx, {
         type: 'line',
-        data: {
-            labels: data.map(d => d.date),
-            datasets: [{
-                data: data.map(d => d.val1),
-                borderColor: '#2563EB', // warmBlue
-                borderWidth: 3,
-                backgroundColor: gradient,
-                tension: 0.4, 
-                pointRadius: 0,
-                pointHoverRadius: 6,
-                pointHoverBackgroundColor: '#2563EB',
-                pointHoverBorderColor: '#fff',
-                pointHoverBorderWidth: 2,
-                fill: true
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false }, tooltip: { enabled: false } },
-            scales: {
-                x: { display: false },
-                y: { display: false, min: Math.min(...data.map(d => d.val1)) * 0.9 }
-            },
-            layout: { padding: 5 }
-        }
+        data: { labels: data.map(d => d.date), datasets: [{ data: data.map(d => d.val1), borderColor: '#2563EB', borderWidth: 3, backgroundColor: gradient, tension: 0.4, pointRadius: 0, pointHoverRadius: 6, pointHoverBackgroundColor: '#2563EB', pointHoverBorderColor: '#fff', pointHoverBorderWidth: 2, fill: true }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { x: { display: false }, y: { display: false, min: Math.min(...data.map(d => d.val1)) * 0.9 } }, layout: { padding: 5 } }
     });
 </script>
 {% endif %}

@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Historique Patient{% endblock %}
+{% block title %}{{ t('hist_patient_title') }}{% endblock %}
 
 {% block content %}
 <div class="max-w-4xl mx-auto p-6 space-y-8">
@@ -10,33 +10,27 @@
                 <i data-lucide="arrow-left" class="w-5 h-5"></i>
             </a>
             <div>
-                <h2 class="text-2xl font-extrabold text-gray-900">Historique de {{ patient.first_name }} {{ patient.last_name }}</h2>
+                <h2 class="text-2xl font-extrabold text-gray-900">{{ t('hist_of') }} {{ patient.first_name }} {{ patient.last_name }}</h2>
                 <p class="text-sm font-bold text-gray-400">{{ patient.user.email }}</p>
             </div>
         </div>
     </div>
 
-    <!-- GRAPH OVERVIEW -->
     {% if measurements %}
     <div class="bg-white p-6 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100">
         <div class="flex items-center justify-between mb-6">
-            <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wide">Évolution</h3>
-            
-            <!-- Filter Buttons -->
+            <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wide">{{ t('hist_evolution') }}</h3>
             <div class="flex bg-gray-50 rounded-xl p-1 gap-1 overflow-x-auto max-w-[200px] md:max-w-none no-scrollbar">
-                <button onclick="updateChart('all')" id="btn-all" class="px-3 py-1 text-xs font-bold rounded-lg bg-white text-gray-900 shadow-sm transition-all filter-btn whitespace-nowrap">Tous</button>
-                <button onclick="updateChart('tension')" id="btn-tension" class="px-3 py-1 text-xs font-bold rounded-lg text-gray-500 hover:text-gray-900 transition-all filter-btn whitespace-nowrap">Tension</button>
-                <button onclick="updateChart('glycemie')" id="btn-glycemie" class="px-3 py-1 text-xs font-bold rounded-lg text-gray-500 hover:text-gray-900 transition-all filter-btn whitespace-nowrap">Glycémie</button>
-                <button onclick="updateChart('poids')" id="btn-poids" class="px-3 py-1 text-xs font-bold rounded-lg text-gray-500 hover:text-gray-900 transition-all filter-btn whitespace-nowrap">Poids</button>
+                <button onclick="updateChart('all')" id="btn-all" class="px-3 py-1 text-xs font-bold rounded-lg bg-white text-gray-900 shadow-sm transition-all filter-btn whitespace-nowrap">{{ t('filter_all') }}</button>
+                <button onclick="updateChart('tension')" id="btn-tension" class="px-3 py-1 text-xs font-bold rounded-lg text-gray-500 hover:text-gray-900 transition-all filter-btn whitespace-nowrap">{{ t('type_tension') }}</button>
+                <button onclick="updateChart('glycemie')" id="btn-glycemie" class="px-3 py-1 text-xs font-bold rounded-lg text-gray-500 hover:text-gray-900 transition-all filter-btn whitespace-nowrap">{{ t('type_glycemie') }}</button>
+                <button onclick="updateChart('poids')" id="btn-poids" class="px-3 py-1 text-xs font-bold rounded-lg text-gray-500 hover:text-gray-900 transition-all filter-btn whitespace-nowrap">{{ t('type_poids') }}</button>
             </div>
         </div>
-        <div class="h-64 w-full">
-            <canvas id="patientChart"></canvas>
-        </div>
+        <div class="h-64 w-full"><canvas id="patientChart"></canvas></div>
     </div>
     {% endif %}
 
-    <!-- LIST -->
     <div class="grid gap-3">
         {% for m in measurements %}
         <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex justify-between items-center transition hover:shadow-md hover:border-blue-50">
@@ -60,13 +54,12 @@
                     </div>
                 </div>
             </div>
-            
             <span class="text-xs font-bold uppercase tracking-wide px-3 py-1 rounded-full
                 {% if m.type == 'tension' %}bg-red-50 text-red-600
                 {% elif m.type == 'glycemie' %}bg-blue-50 text-blue-600
                 {% elif m.type == 'poids' %}bg-green-50 text-green-600
                 {% else %}bg-gray-50 text-gray-600{% endif %}">
-                {{ m.type }}
+                {{ tm(m.type) }}
             </span>
         </div>
         {% endfor %}
@@ -75,13 +68,15 @@
 
 {% if measurements %}
 <script>
-    let patientChart;
-    let rawData = [];
+    var LBL_TENSION  = '{{ t('type_tension') }}';
+    var LBL_GLYCEMIE = '{{ t('type_glycemie') }}';
+    var LBL_POIDS    = '{{ t('type_poids') }}';
+
+    let patientChart, currentFilteredData = null, rawData = [];
 
     document.addEventListener('DOMContentLoaded', function() {
         const ctx = document.getElementById('patientChart').getContext('2d');
         rawData = JSON.parse('{{ chart_data_json|safe }}');
-        
         initChart(ctx);
         updateChart('all');
     });
@@ -91,86 +86,39 @@
             type: 'line',
             data: { labels: [], datasets: [] },
             options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        backgroundColor: '#1F2937',
-                        padding: 12,
-                        cornerRadius: 12,
-                        titleFont: { family: 'Nunito', size: 12 },
-                        bodyFont: { family: 'Nunito', size: 14, weight: 'bold' },
-                        displayColors: true,
-                    }
-                },
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false }, tooltip: { backgroundColor: '#1F2937', padding: 12, cornerRadius: 12, titleFont: { family: 'Nunito', size: 12 }, bodyFont: { family: 'Nunito', size: 14, weight: 'bold' }, displayColors: true } },
                 scales: {
                     x: { grid: { display: false }, ticks: { font: { size: 10, family: 'Nunito', weight: 'bold' }, color: '#9CA3AF', maxTicksLimit: 6 } },
-                    y: { grid: { color: '#F3F4F6', borderDash: [5, 5] }, ticks: { font: { size: 10, family: 'Nunito', weight: 'bold' }, color: '#9CA3AF', padding: 10 }, beginAtZero: false }
+                    y: { grid: { color: '#F3F4F6', borderDash: [5,5] }, ticks: { font: { size: 10, family: 'Nunito', weight: 'bold' }, color: '#9CA3AF', padding: 10 }, beginAtZero: false }
                 },
                 interaction: { mode: 'index', intersect: false }
             }
         });
     }
 
-    let currentFilteredData = null;
-
     function updateChart(type) {
         patientChart.data.datasets = [];
-        
         if (type === 'all') {
             currentFilteredData = null;
             patientChart.data.labels = rawData.map(d => d.date);
-
-            patientChart.data.datasets.push({
-                label: 'Tension',
-                data: rawData.map(d => d.type === 'tension' ? d.val1 : null),
-                borderColor: '#EF4444', backgroundColor: '#EF4444', borderWidth: 2, pointRadius: 3, spanGaps: true, tension: 0.4
-            });
-            patientChart.data.datasets.push({
-                label: 'Glycémie',
-                data: rawData.map(d => d.type === 'glycemie' ? d.val1 : null),
-                borderColor: '#2563EB', backgroundColor: '#2563EB', borderWidth: 2, pointRadius: 3, spanGaps: true, tension: 0.4
-            });
-            patientChart.data.datasets.push({
-                label: 'Poids',
-                data: rawData.map(d => d.type === 'poids' ? d.val1 : null),
-                borderColor: '#22C55E', backgroundColor: '#22C55E', borderWidth: 2, pointRadius: 3, spanGaps: true, tension: 0.4
-            });
-
+            patientChart.data.datasets.push({ label: LBL_TENSION,  data: rawData.map(d => d.type==='tension'  ? d.val1 : null), borderColor:'#EF4444', backgroundColor:'#EF4444', borderWidth:2, pointRadius:3, spanGaps:true, tension:0.4 });
+            patientChart.data.datasets.push({ label: LBL_GLYCEMIE, data: rawData.map(d => d.type==='glycemie' ? d.val1 : null), borderColor:'#2563EB', backgroundColor:'#2563EB', borderWidth:2, pointRadius:3, spanGaps:true, tension:0.4 });
+            patientChart.data.datasets.push({ label: LBL_POIDS,    data: rawData.map(d => d.type==='poids'    ? d.val1 : null), borderColor:'#22C55E', backgroundColor:'#22C55E', borderWidth:2, pointRadius:3, spanGaps:true, tension:0.4 });
         } else {
             const filteredData = rawData.filter(item => item.type === type);
             currentFilteredData = filteredData;
             patientChart.data.labels = filteredData.map(d => d.date);
-            
-            let color = '#2563EB';
-            if (type === 'tension') color = '#EF4444';
-            if (type === 'glycemie') color = '#2563EB';
-            if (type === 'poids') color = '#22C55E';
-
-            patientChart.data.datasets.push({
-                label: type,
-                data: filteredData.map(d => d.val1),
-                borderColor: color,
-                backgroundColor: color + '10',
-                pointBorderColor: color,
-                borderWidth: 3,
-                pointRadius: 4,
-                fill: true,
-                tension: 0.4
-            });
+            let color = '#2563EB', label = type;
+            if (type === 'tension')  { color = '#EF4444'; label = LBL_TENSION; }
+            if (type === 'glycemie') { color = '#2563EB'; label = LBL_GLYCEMIE; }
+            if (type === 'poids')    { color = '#22C55E'; label = LBL_POIDS; }
+            patientChart.data.datasets.push({ label, data: filteredData.map(d => d.val1), borderColor: color, backgroundColor: color+'10', pointBorderColor: color, borderWidth:3, pointRadius:4, fill:true, tension:0.4 });
         }
         patientChart.update();
-
-        document.querySelectorAll('.filter-btn').forEach(btn => {
-            btn.classList.remove('bg-white', 'text-gray-900', 'shadow-sm');
-            btn.classList.add('text-gray-500');
-        });
+        document.querySelectorAll('.filter-btn').forEach(btn => { btn.classList.remove('bg-white','text-gray-900','shadow-sm'); btn.classList.add('text-gray-500'); });
         const activeBtn = document.getElementById('btn-' + type);
-        if(activeBtn) {
-            activeBtn.classList.add('bg-white', 'text-gray-900', 'shadow-sm');
-            activeBtn.classList.remove('text-gray-500');
-        }
+        if (activeBtn) { activeBtn.classList.add('bg-white','text-gray-900','shadow-sm'); activeBtn.classList.remove('text-gray-500'); }
     }
 </script>
 {% endif %}

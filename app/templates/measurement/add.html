@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Nouvelle mesure{% endblock %}
+{% block title %}{{ t('meas_manual') }}{% endblock %}
 
 {% block content %}
 <div class="max-w-md mx-auto">
@@ -8,14 +8,14 @@
         <a href="{{ url_for('main.select_measurement_method') }}" class="p-2 rounded-lg hover:bg-slate-100 text-slate-500 transition active:scale-95">
             <i data-lucide="arrow-left" class="w-5 h-5"></i>
         </a>
-        <h1 class="text-xl font-bold text-slate-900">Saisie manuelle</h1>
+        <h1 class="text-xl font-bold text-slate-900">{{ t('meas_manual') }}</h1>
     </div>
 
     <form method="POST" action="{{ url_for('main.add_measurement') }}" class="space-y-6">
         {{ form.hidden_tag() }}
-        
+
         <div class="space-y-2">
-            <label class="block text-sm font-semibold text-slate-700">Type de mesure</label>
+            <label class="block text-sm font-semibold text-slate-700">{{ t('meas_type') }}</label>
             <div class="grid grid-cols-3 gap-3">
                 {% for subfield in form.type %}
                 <label class="cursor-pointer">
@@ -34,58 +34,67 @@
 
         <div class="grid grid-cols-2 gap-4">
             <div class="space-y-2">
-                <label id="label-val1" class="block text-sm font-semibold text-slate-700">Valeur 1</label>
+                <label id="label-val1" class="block text-sm font-semibold text-slate-700">{{ t('meas_value1') }}</label>
                 {{ form.value1(class="block w-full rounded-xl border-slate-200 shadow-sm focus:border-primary focus:ring-primary py-3 px-4 text-lg font-bold text-slate-900 placeholder:text-slate-300", placeholder="Ex: 120") }}
             </div>
             <div id="container-val2" class="space-y-2">
-                <label id="label-val2" class="block text-sm font-semibold text-slate-700">Valeur 2 (Opt.)</label>
+                <label id="label-val2" class="block text-sm font-semibold text-slate-700">{{ t('meas_value2') }}</label>
                 {{ form.value2(class="block w-full rounded-xl border-slate-200 shadow-sm focus:border-primary focus:ring-primary py-3 px-4 text-lg font-bold text-slate-900 placeholder:text-slate-300", placeholder="Ex: 80") }}
             </div>
         </div>
 
         <div class="space-y-2">
-            <label class="block text-sm font-semibold text-slate-700">Notes (Optionnel)</label>
+            <label class="block text-sm font-semibold text-slate-700">{{ t('meas_notes') }}</label>
             {{ form.notes(class="block w-full rounded-xl border-slate-200 shadow-sm focus:border-primary focus:ring-primary py-3 px-4 text-sm text-slate-900 placeholder:text-slate-400", rows="3", placeholder="Commentaire...") }}
         </div>
 
         <button type="submit" class="w-full bg-primary text-white font-semibold rounded-xl py-4 shadow-md shadow-blue-200 hover:bg-blue-700 transition active:scale-[0.98]">
-            Enregistrer la mesure
+            {{ t('meas_save') }}
         </button>
     </form>
 </div>
 
 <script>
+    // Server-rendered label strings so they switch language with the rest of the UI
+    var LABEL_SYSTOLIC  = '{{ t('meas_systolic') }}';
+    var LABEL_DIASTOLIC = '{{ t('meas_diastolic') }}';
+    var LABEL_GLUCOSE   = '{{ t('meas_glucose') }}';
+    var LABEL_WEIGHT    = '{{ t('meas_weight') }}';
+    var LABEL_VALUE1    = '{{ t('meas_value1') }}';
+    var LABEL_VALUE2    = '{{ t('meas_value2') }}';
+
     document.addEventListener('DOMContentLoaded', function() {
-        const typeInputs = document.querySelectorAll('input[name="type"]');
-        const labelVal1 = document.getElementById('label-val1');
-        const labelVal2 = document.getElementById('label-val2');
+        const typeInputs    = document.querySelectorAll('input[name="type"]');
+        const labelVal1     = document.getElementById('label-val1');
+        const labelVal2     = document.getElementById('label-val2');
         const containerVal2 = document.getElementById('container-val2');
-        const inputVal1 = document.querySelector('input[name="value1"]');
-        const inputVal2 = document.querySelector('input[name="value2"]');
+        const inputVal1     = document.querySelector('input[name="value1"]');
+        const inputVal2     = document.querySelector('input[name="value2"]');
 
         function updateForm(type) {
             if (type === 'tension') {
-                labelVal1.textContent = 'Systolique (mmHg)';
-                labelVal2.textContent = 'Diastolique (mmHg)';
+                labelVal1.textContent = LABEL_SYSTOLIC;
+                labelVal2.textContent = LABEL_DIASTOLIC;
                 containerVal2.style.display = 'block';
                 inputVal1.placeholder = '120';
                 inputVal2.placeholder = '80';
             } else if (type === 'glycemie') {
-                labelVal1.textContent = 'Glucose (mg/dL)';
+                labelVal1.textContent = LABEL_GLUCOSE;
                 containerVal2.style.display = 'none';
                 inputVal1.placeholder = '100';
             } else if (type === 'poids') {
-                labelVal1.textContent = 'Poids (kg)';
+                labelVal1.textContent = LABEL_WEIGHT;
                 containerVal2.style.display = 'none';
                 inputVal1.placeholder = '70.5';
+            } else {
+                labelVal1.textContent = LABEL_VALUE1;
+                labelVal2.textContent = LABEL_VALUE2;
             }
         }
 
         typeInputs.forEach(input => {
             input.addEventListener('change', (e) => updateForm(e.target.value));
-            if (input.checked) {
-                updateForm(input.value);
-            }
+            if (input.checked) updateForm(input.value);
         });
     });
 </script>

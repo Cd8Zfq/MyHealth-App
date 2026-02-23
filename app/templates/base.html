@@ -1,22 +1,21 @@
 <!DOCTYPE html>
-<html lang="fr" class="scroll-smooth">
+<html lang="{{ g.lang }}" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>{% block title %}MyHealth{% endblock %}</title>
-    
-    <!-- Police Nunito -->
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
-    
+
     <link rel="stylesheet" href="{{ url_for('static', filename='css/output.css') }}">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body class="bg-bg-page text-mainText font-sans antialiased min-h-screen flex flex-col selection:bg-blue-100 selection:text-blue-900">
 
-    <!-- Desktop Header (Minimalist) -->
+    <!-- Desktop Header -->
     <header class="hidden md:flex fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
         <div class="max-w-4xl mx-auto px-6 h-20 flex items-center justify-between w-full">
             <a href="{{ url_for('main.index') }}" class="flex items-center gap-3">
@@ -29,20 +28,28 @@
             <nav class="flex items-center gap-8 font-bold text-gray-500">
                 {% if current_user.is_authenticated %}
                     {% if current_user.role == 'doctor' %}
-                        <a href="{{ url_for('main.doctor_dashboard') }}" class="hover:text-blue-600 transition-colors">Dashboard</a>
-                        <a href="{{ url_for('main.patients') }}" class="hover:text-blue-600 transition-colors">Patients</a>
-                        <a href="{{ url_for('main.agenda') }}" class="hover:text-blue-600 transition-colors">Agenda</a>
+                        <a href="{{ url_for('main.doctor_dashboard') }}" class="hover:text-blue-600 transition-colors">{{ t('nav_dashboard') }}</a>
+                        <a href="{{ url_for('main.patients') }}" class="hover:text-blue-600 transition-colors">{{ t('nav_patients') }}</a>
+                        <a href="{{ url_for('main.agenda') }}" class="hover:text-blue-600 transition-colors">{{ t('nav_agenda') }}</a>
                     {% else %}
-                        <a href="{{ url_for('main.home') }}" class="hover:text-blue-600 transition-colors">Tableau de bord</a>
-                        <a href="{{ url_for('main.history') }}" class="hover:text-blue-600 transition-colors">Historique</a>
-                        <a href="{{ url_for('main.reminders') }}" class="hover:text-blue-600 transition-colors">Rappels</a>
+                        <a href="{{ url_for('main.home') }}" class="hover:text-blue-600 transition-colors">{{ t('nav_dashboard') }}</a>
+                        <a href="{{ url_for('main.history') }}" class="hover:text-blue-600 transition-colors">{{ t('nav_history') }}</a>
+                        <a href="{{ url_for('main.reminders') }}" class="hover:text-blue-600 transition-colors">{{ t('nav_reminders') }}</a>
                     {% endif %}
-                    <a href="{{ url_for('main.profile') }}" class="hover:text-blue-600 transition-colors">Profil</a>
-                    <a href="{{ url_for('main.logout') }}" class="text-red-400 hover:text-red-600 transition-colors">Déconnexion</a>
+                    <a href="{{ url_for('main.profile') }}" class="hover:text-blue-600 transition-colors">{{ t('nav_profile') }}</a>
+                    <a href="{{ url_for('main.logout') }}" class="text-red-400 hover:text-red-600 transition-colors">{{ t('nav_logout') }}</a>
                 {% else %}
-                    <a href="{{ url_for('main.login') }}" class="hover:text-blue-600 transition-colors">Se connecter</a>
-                    <a href="{{ url_for('main.register') }}" class="px-6 py-3 bg-blue-600 text-white rounded-2xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-200">S'inscrire</a>
+                    <a href="{{ url_for('main.login') }}" class="hover:text-blue-600 transition-colors">{{ t('nav_login') }}</a>
+                    <a href="{{ url_for('main.register') }}" class="px-6 py-3 bg-blue-600 text-white rounded-2xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-200">{{ t('nav_register') }}</a>
                 {% endif %}
+
+                <!-- Language toggle -->
+                <div class="flex bg-gray-100 rounded-full p-1 gap-0.5">
+                    <a href="{{ url_for('main.set_lang', lang='fr') }}"
+                       class="px-3 py-1 rounded-full text-xs font-bold transition-all {% if g.lang == 'fr' %}bg-white text-slate-900 shadow-sm{% else %}text-slate-400 hover:text-slate-600{% endif %}">FR</a>
+                    <a href="{{ url_for('main.set_lang', lang='en') }}"
+                       class="px-3 py-1 rounded-full text-xs font-bold transition-all {% if g.lang == 'en' %}bg-white text-slate-900 shadow-sm{% else %}text-slate-400 hover:text-slate-600{% endif %}">EN</a>
+                </div>
             </nav>
         </div>
     </header>
@@ -75,69 +82,60 @@
         {% block content %}{% endblock %}
     </main>
 
-    <!-- Mobile Bottom Navigation (Design System HealthTech Soft) -->
+    <!-- Mobile Bottom Navigation -->
     {% if current_user.is_authenticated %}
     <nav class="md:hidden fixed bottom-0 left-0 w-full bg-white/90 backdrop-blur-xl border-t border-white/20 z-50 pb-safe rounded-t-[2.5rem] shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
         <div class="grid grid-cols-5 h-24 items-center px-2">
             {% if current_user.role == 'doctor' %}
-                <!-- Dashboard -->
                 <a href="{{ url_for('main.doctor_dashboard') }}" class="flex flex-col items-center justify-center gap-1 group">
                     <div class="p-3 rounded-2xl transition-all duration-300 {% if request.endpoint == 'main.doctor_dashboard' %}bg-blue-50 text-blue-600{% else %}text-gray-400 group-hover:text-gray-600{% endif %}">
                         <i data-lucide="layout-dashboard" class="w-6 h-6 {% if request.endpoint == 'main.doctor_dashboard' %}stroke-[3]{% endif %}"></i>
                     </div>
                 </a>
 
-                <!-- Patients -->
                 <a href="{{ url_for('main.patients') }}" class="flex flex-col items-center justify-center gap-1 group">
                     <div class="p-3 rounded-2xl transition-all duration-300 {% if request.endpoint == 'main.patients' %}bg-blue-50 text-blue-600{% else %}text-gray-400 group-hover:text-gray-600{% endif %}">
                         <i data-lucide="users" class="w-6 h-6 {% if request.endpoint == 'main.patients' %}stroke-[3]{% endif %}"></i>
                     </div>
                 </a>
 
-                <!-- Add (Main Action) -->
                 <a href="{{ url_for('main.agenda') }}" id="doctorMobileAddBtn" class="flex flex-col items-center justify-center -mt-8">
                     <div class="bg-blue-600 text-white p-5 rounded-[1.5rem] shadow-[0_10px_25px_rgba(37,99,235,0.4)] transition-transform active:scale-90 border-4 border-bg-page">
                         <i data-lucide="plus" class="w-8 h-8 stroke-[3]"></i>
                     </div>
                 </a>
 
-                <!-- Agenda -->
                 <a href="{{ url_for('main.agenda') }}" class="flex flex-col items-center justify-center gap-1 group">
                     <div class="p-3 rounded-2xl transition-all duration-300 {% if request.endpoint == 'main.agenda' %}bg-blue-50 text-blue-600{% else %}text-gray-400 group-hover:text-gray-600{% endif %}">
                         <i data-lucide="calendar" class="w-6 h-6 {% if request.endpoint == 'main.agenda' %}stroke-[3]{% endif %}"></i>
                     </div>
                 </a>
             {% else %}
-                <!-- Home -->
                 <a href="{{ url_for('main.home') }}" class="flex flex-col items-center justify-center gap-1 group">
                     <div class="p-3 rounded-2xl transition-all duration-300 {% if request.endpoint == 'main.home' %}bg-blue-50 text-blue-600{% else %}text-gray-400 group-hover:text-gray-600{% endif %}">
                         <i data-lucide="home" class="w-6 h-6 {% if request.endpoint == 'main.home' %}stroke-[3]{% endif %}"></i>
                     </div>
                 </a>
 
-                <!-- History -->
                 <a href="{{ url_for('main.history') }}" class="flex flex-col items-center justify-center gap-1 group">
                     <div class="p-3 rounded-2xl transition-all duration-300 {% if request.endpoint == 'main.history' %}bg-blue-50 text-blue-600{% else %}text-gray-400 group-hover:text-gray-600{% endif %}">
                         <i data-lucide="bar-chart-2" class="w-6 h-6 {% if request.endpoint == 'main.history' %}stroke-[3]{% endif %}"></i>
                     </div>
                 </a>
-                
-                <!-- Add (Main Action) -->
+
                 <a href="{{ url_for('main.select_measurement_method') }}" class="flex flex-col items-center justify-center -mt-8">
                     <div class="bg-blue-600 text-white p-5 rounded-[1.5rem] shadow-[0_10px_25px_rgba(37,99,235,0.4)] transition-transform active:scale-90 border-4 border-bg-page">
                         <i data-lucide="plus" class="w-8 h-8 stroke-[3]"></i>
                     </div>
                 </a>
-                
-                <!-- Reminders -->
+
                 <a href="{{ url_for('main.reminders') }}" class="flex flex-col items-center justify-center gap-1 group">
                     <div class="p-3 rounded-2xl transition-all duration-300 {% if request.endpoint == 'main.reminders' %}bg-blue-50 text-blue-600{% else %}text-gray-400 group-hover:text-gray-600{% endif %}">
                         <i data-lucide="bell" class="w-6 h-6 {% if request.endpoint == 'main.reminders' %}stroke-[3]{% endif %}"></i>
                     </div>
                 </a>
             {% endif %}
-            
-            <!-- Profile -->
+
             <a href="{{ url_for('main.profile') }}" class="flex flex-col items-center justify-center gap-1 group">
                 <div class="p-3 rounded-2xl transition-all duration-300 {% if request.endpoint == 'main.profile' %}bg-blue-50 text-blue-600{% else %}text-gray-400 group-hover:text-gray-600{% endif %}">
                     <i data-lucide="user" class="w-6 h-6 {% if request.endpoint == 'main.profile' %}stroke-[3]{% endif %}"></i>

@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 
-{% block title %}Mes Patients{% endblock %}
+{% block title %}{{ t('patients_my') }}{% endblock %}
 
 {% block content %}
 <div class="space-y-6">
     <div class="flex items-center justify-between">
-        <h1 class="text-2xl font-bold text-gray-900">Mes Patients</h1>
+        <h1 class="text-2xl font-bold text-gray-900">{{ t('patients_my') }}</h1>
         <div class="bg-blue-50 text-blue-600 px-3 py-1 rounded-lg text-sm font-bold">
-            {{ patients|length }} Patient(s)
+            {{ patients|length }} {{ t('patients_count') }}
         </div>
     </div>
 
@@ -23,18 +23,17 @@
                     <p class="text-slate-500 text-sm">{{ patient.user.email }}</p>
                 </div>
             </div>
-            
             <a href="{{ url_for('main.patient_history', user_id=patient.user.id) }}" class="flex items-center gap-2 text-blue-600 font-bold bg-blue-50 px-4 py-2 rounded-xl group-hover:bg-blue-600 group-hover:text-white transition-all">
-                Dossier
+                {{ t('patients_file') }}
                 <i data-lucide="arrow-right" class="w-4 h-4"></i>
             </a>
         </div>
         {% endfor %}
-        
+
         {% if not patients %}
         <div class="text-center py-12 text-slate-400">
             <i data-lucide="users" class="w-12 h-12 mx-auto mb-3 opacity-50"></i>
-            <p>Aucun patient enregistré.</p>
+            <p>{{ t('patients_empty') }}</p>
         </div>
         {% endif %}
     </div>

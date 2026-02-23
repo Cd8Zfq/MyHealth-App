@@ -1,20 +1,20 @@
 {% extends "base.html" %}
 
-{% block title %}Mes Rendez-vous & Rappels{% endblock %}
+{% block title %}{{ t('reminders_page_title') }}{% endblock %}
 
 {% block content %}
 <div class="space-y-12 pb-24">
-    
-    <!-- 1. SECTION RENDEZ-VOUS (NOUVEAU) -->
+
+    <!-- Appointments -->
     <div class="space-y-6">
         <div class="flex justify-between items-center px-2">
             <div>
-                <h2 class="text-2xl font-extrabold text-gray-900">Rendez-vous</h2>
-                <p class="text-gray-500 font-bold text-sm">Vos consultations à venir</p>
+                <h2 class="text-2xl font-extrabold text-gray-900">{{ t('reminders_appts') }}</h2>
+                <p class="text-gray-500 font-bold text-sm">{{ t('reminders_upcoming') }}</p>
             </div>
             <a href="{{ url_for('main.book_appointment') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl shadow-lg shadow-blue-200 transition active:scale-95 flex items-center gap-2 font-bold text-sm">
                 <i data-lucide="calendar-plus" class="w-4 h-4"></i>
-                Prendre RDV
+                {{ t('reminders_book') }}
             </a>
         </div>
 
@@ -29,20 +29,17 @@
                         <div>
                             <div class="flex items-center gap-2">
                                 <h4 class="font-bold text-gray-900">{{ apt.start_time.strftime('%B')|capitalize }}</h4>
-                                
-                                <!-- BADGES -->
                                 {% if apt.status == 'confirmed' %}
-                                    <span class="bg-green-100 text-green-700 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">Confirmé</span>
+                                    <span class="bg-green-100 text-green-700 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">{{ t('reminders_confirmed') }}</span>
                                 {% elif apt.status == 'pending' %}
-                                    <span class="bg-orange-100 text-orange-700 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">En attente</span>
+                                    <span class="bg-orange-100 text-orange-700 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">{{ t('reminders_pending') }}</span>
                                 {% elif apt.status == 'cancelled' %}
-                                    <span class="bg-red-100 text-red-700 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">Annulé</span>
+                                    <span class="bg-red-100 text-red-700 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">{{ t('reminders_cancelled') }}</span>
                                 {% endif %}
                             </div>
                             <p class="text-sm text-gray-400 font-medium">{{ apt.start_time.strftime('%H:%M') }} • Dr. {{ apt.doctor.patient.last_name }}</p>
                         </div>
                     </div>
-                    
                     {% if apt.type == 'visio' and apt.status == 'confirmed' %}
                     <button class="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center hover:bg-blue-600 hover:text-white transition-colors">
                         <i data-lucide="video" class="w-5 h-5"></i>
@@ -52,22 +49,21 @@
                 {% endfor %}
             {% else %}
                 <div class="text-center py-12 bg-white/50 rounded-3xl border border-dashed border-gray-200 flex flex-col items-center gap-4">
-                    <p class="text-gray-400 text-sm font-medium">Aucun rendez-vous prévu.</p>
+                    <p class="text-gray-400 text-sm font-medium">{{ t('reminders_no_appts') }}</p>
                     <a href="{{ url_for('main.book_appointment') }}" class="px-6 py-2 bg-blue-100 text-blue-600 font-bold rounded-xl hover:bg-blue-200 transition active:scale-95 text-sm flex items-center gap-2">
                         <i data-lucide="calendar-plus" class="w-4 h-4"></i>
-                        Prendre rendez-vous
+                        {{ t('reminders_book_link') }}
                     </a>
                 </div>
             {% endif %}
         </div>
     </div>
 
-
-    <!-- 2. SECTION RAPPELS (EXISTANT) -->
+    <!-- Treatment Reminders -->
     <div class="space-y-6">
         <div class="flex justify-between items-center px-2">
             <div>
-                <h2 class="text-2xl font-extrabold text-gray-900">Rappels Traitements</h2>
+                <h2 class="text-2xl font-extrabold text-gray-900">{{ t('reminders_treatment') }}</h2>
             </div>
             <a href="{{ url_for('main.add_reminder') }}" class="w-10 h-10 bg-orange-100 text-orange-600 rounded-xl flex items-center justify-center hover:bg-orange-200 transition active:scale-95">
                 <i data-lucide="plus" class="w-5 h-5 stroke-[3]"></i>
@@ -83,11 +79,13 @@
                     </div>
                     <div>
                         <h4 class="font-bold text-gray-900">{{ reminder.title }}</h4>
-                        <p class="text-xs font-bold text-gray-400">{{ reminder.time }} • {{ reminder.days or 'Tous les jours' }}</p>
+                        <p class="text-xs font-bold text-gray-400">{{ reminder.time }} • {{ reminder.days or t('reminders_everyday') }}</p>
                     </div>
                 </div>
                 <div class="flex items-center gap-3">
-                    <a href="{{ url_for('main.delete_reminder', id=reminder.id) }}" class="p-2 text-red-400 hover:text-red-600 transition-colors" onclick="return confirm('Supprimer ce rappel ?')">
+                    <a href="{{ url_for('main.delete_reminder', id=reminder.id) }}"
+                       class="p-2 text-red-400 hover:text-red-600 transition-colors"
+                       onclick="return confirm(DELETE_MSG)">
                         <i data-lucide="trash-2" class="w-5 h-5"></i>
                     </a>
                     <a href="{{ url_for('main.toggle_reminder', id=reminder.id) }}" class="flex items-center">
@@ -99,14 +97,18 @@
             </div>
             {% else %}
             <div class="text-center py-12 bg-white/50 rounded-3xl border border-dashed border-gray-200 flex flex-col items-center gap-4">
-                <p class="text-gray-400 text-sm font-medium">Aucun rappel configuré.</p>
+                <p class="text-gray-400 text-sm font-medium">{{ t('reminders_no_rem') }}</p>
                 <a href="{{ url_for('main.add_reminder') }}" class="px-6 py-2 bg-orange-100 text-orange-600 font-bold rounded-xl hover:bg-orange-200 transition active:scale-95 text-sm flex items-center gap-2">
                     <i data-lucide="plus" class="w-4 h-4"></i>
-                    Créer un rappel
+                    {{ t('reminders_create') }}
                 </a>
             </div>
             {% endfor %}
         </div>
     </div>
 </div>
+
+<script>
+    var DELETE_MSG = '{{ t('reminders_delete_confirm') }}';
+</script>
 {% endblock %}

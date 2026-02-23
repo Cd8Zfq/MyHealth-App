@@ -1,31 +1,29 @@
 {% extends "base.html" %}
 
-{% block title %}Tableau de bord{% endblock %}
+{% block title %}{{ t('nav_dashboard') }}{% endblock %}
 
 {% block content %}
 <div class="space-y-8">
-    
-    <!-- Header Minimaliste -->
+
+    <!-- Header -->
     <div class="flex items-center justify-between pt-2 px-2">
         <div class="space-y-1">
             <h1 class="text-3xl font-extrabold text-gray-900 flex items-center gap-3">
-                Bonjour, {{ current_user.email.split('@')[0]|capitalize }}
+                {{ t('dash_hello') }} {{ current_user.email.split('@')[0]|capitalize }}
                 <span class="text-2xl animate-bounce origin-bottom-right">👋</span>
             </h1>
-            <p class="text-gray-500 font-bold">Prêt pour votre suivi santé ?</p>
+            <p class="text-gray-500 font-bold">{{ t('dash_ready') }}</p>
         </div>
-        <!-- Profile Pic Placeholder -->
         <a href="{{ url_for('main.profile') }}" class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-gray-400 border border-gray-100 shadow-sm active:scale-95 transition-transform">
             <i data-lucide="user" class="w-6 h-6"></i>
         </a>
     </div>
 
-    <!-- Hero Card (Dernière mesure) -->
+    <!-- Hero Card (Latest measurement) -->
     <div class="relative bg-white rounded-[2rem] p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden">
-        <!-- Abstract Decoration -->
         <div class="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-bl-[4rem] -mr-8 -mt-8 opacity-50"></div>
         <div class="absolute bottom-0 right-0 w-24 h-24 bg-green-50 rounded-tl-[3rem] -mr-4 -mb-4 opacity-50"></div>
-        
+
         {% if latest %}
         <div class="relative z-10">
             <div class="flex items-start justify-between mb-2">
@@ -36,20 +34,21 @@
                         {% elif latest.type == 'poids' %}<i data-lucide="scale" class="w-5 h-5 text-green-500"></i>
                         {% else %}<i data-lucide="activity" class="w-5 h-5 text-gray-500"></i>{% endif %}
                     </div>
-                    <span class="text-sm font-bold text-gray-400 uppercase tracking-wider">{{ latest.type }}</span>
+                    <span class="text-sm font-bold text-gray-400 uppercase tracking-wider">{{ tm(latest.type) }}</span>
                 </div>
+
                 <!-- Dynamic Status Badge -->
                 {% set status_color = 'bg-green-50 text-green-600' %}
-                {% set status_text = 'Normale' %}
+                {% set status_text = t('status_normal') %}
                 {% set indicator_color = 'bg-green-500' %}
-                
+
                 {% if latest.type == 'tension' and (latest.value1|float > 140 or latest.value1|float < 90) %}
                     {% set status_color = 'bg-red-50 text-red-600' %}
-                    {% set status_text = 'À surveiller' %}
+                    {% set status_text = t('status_watch') %}
                     {% set indicator_color = 'bg-red-500' %}
                 {% elif latest.type == 'glycemie' and latest.value1|float > 140 %}
                     {% set status_color = 'bg-orange-50 text-orange-600' %}
-                    {% set status_text = 'Élevée' %}
+                    {% set status_text = t('status_high') %}
                     {% set indicator_color = 'bg-orange-500' %}
                 {% endif %}
 
@@ -67,7 +66,7 @@
                     <span class="text-xl font-bold text-gray-400">{{ latest.unit }}</span>
                 </div>
                 <p class="text-gray-400 text-sm mt-2 font-medium">
-                    Enregistré aujourd'hui à {{ latest.date.strftime('%H:%M') }}
+                    {{ t('dash_recorded_at') }} {{ latest.date.strftime('%H:%M') }}
                 </p>
             </div>
         </div>
@@ -76,38 +75,35 @@
             <div class="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-4 text-blue-500">
                 <i data-lucide="activity" class="w-8 h-8"></i>
             </div>
-            <h3 class="text-xl font-bold text-gray-900">Bienvenue !</h3>
-            <p class="text-gray-500 mt-2 font-medium">Commencez par ajouter votre première mesure.</p>
+            <h3 class="text-xl font-bold text-gray-900">{{ t('dash_welcome') }}</h3>
+            <p class="text-gray-500 mt-2 font-medium">{{ t('dash_first_meas') }}</p>
         </div>
         {% endif %}
     </div>
 
-    <!-- Grid Actions (Responsive PC: md:grid-cols-3) -->
+    <!-- Quick Access Grid -->
     <div>
-        <h3 class="text-lg font-bold text-gray-900 mb-4 ml-2">Accès Rapide</h3>
+        <h3 class="text-lg font-bold text-gray-900 mb-4 ml-2">{{ t('dash_quick_access') }}</h3>
         <div class="grid grid-cols-3 gap-4 md:gap-6">
-            <!-- Tension -->
             <a href="{{ url_for('main.add_measurement') }}" class="bg-white p-4 md:p-6 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col items-center gap-3 transition-transform active:scale-95 border border-transparent hover:border-red-100 group">
                 <div class="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-red-50 text-red-500 flex items-center justify-center group-hover:bg-red-100 transition-colors">
                     <i data-lucide="heart" class="w-7 h-7 md:w-8 md:h-8 stroke-[2.5]"></i>
                 </div>
-                <span class="font-bold text-sm md:text-base text-gray-700">Tension</span>
+                <span class="font-bold text-sm md:text-base text-gray-700">{{ t('type_tension') }}</span>
             </a>
 
-            <!-- Glycémie -->
             <a href="{{ url_for('main.add_measurement') }}" class="bg-white p-4 md:p-6 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col items-center gap-3 transition-transform active:scale-95 border border-transparent hover:border-blue-100 group">
                 <div class="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-blue-50 text-blue-500 flex items-center justify-center group-hover:bg-blue-100 transition-colors">
                     <i data-lucide="candy" class="w-7 h-7 md:w-8 md:h-8 stroke-[2.5]"></i>
                 </div>
-                <span class="font-bold text-sm md:text-base text-gray-700">Glycémie</span>
+                <span class="font-bold text-sm md:text-base text-gray-700">{{ t('type_glycemie') }}</span>
             </a>
 
-            <!-- Poids -->
             <a href="{{ url_for('main.add_measurement') }}" class="bg-white p-4 md:p-6 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col items-center gap-3 transition-transform active:scale-95 border border-transparent hover:border-green-100 group">
                 <div class="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-green-50 text-green-500 flex items-center justify-center group-hover:bg-green-100 transition-colors">
                     <i data-lucide="scale" class="w-7 h-7 md:w-8 md:h-8 stroke-[2.5]"></i>
                 </div>
-                <span class="font-bold text-sm md:text-base text-gray-700">Poids</span>
+                <span class="font-bold text-sm md:text-base text-gray-700">{{ t('type_poids') }}</span>
             </a>
         </div>
     </div>
@@ -115,10 +111,10 @@
     <!-- Recent Activity -->
     <div>
         <div class="flex items-center justify-between mb-4 px-2">
-            <h3 class="text-lg font-bold text-gray-900">Activité récente</h3>
-            <a href="{{ url_for('main.history') }}" class="text-sm font-bold text-blue-600 hover:text-blue-700 bg-blue-50 px-3 py-1 rounded-full">Tout voir</a>
+            <h3 class="text-lg font-bold text-gray-900">{{ t('dash_recent') }}</h3>
+            <a href="{{ url_for('main.history') }}" class="text-sm font-bold text-blue-600 hover:text-blue-700 bg-blue-50 px-3 py-1 rounded-full">{{ t('dash_see_all') }}</a>
         </div>
-        
+
         <div class="space-y-3">
             {% if measurements %}
                 {% for m in measurements[:5] %}
@@ -129,28 +125,25 @@
                             {% elif m.type == 'glycemie' %}bg-blue-50 text-blue-500
                             {% elif m.type == 'poids' %}bg-green-50 text-green-500
                             {% else %}bg-gray-50 text-gray-500{% endif %}">
-                            
                             {% if m.type == 'tension' %}<i data-lucide="heart" class="w-6 h-6"></i>
                             {% elif m.type == 'glycemie' %}<i data-lucide="candy" class="w-6 h-6"></i>
                             {% elif m.type == 'poids' %}<i data-lucide="scale" class="w-6 h-6"></i>
                             {% else %}<i data-lucide="activity" class="w-6 h-6"></i>{% endif %}
                         </div>
                         <div>
-                            <p class="font-bold text-gray-900 capitalize text-base">{{ m.type }}</p>
-                            <p class="text-xs font-bold text-gray-400">{{ m.date.strftime('%H:%M') }} • Aujourd'hui</p>
+                            <p class="font-bold text-gray-900 text-base">{{ tm(m.type) }}</p>
+                            <p class="text-xs font-bold text-gray-400">{{ m.date.strftime('%H:%M') }} • {{ t('dash_today') }}</p>
                         </div>
                     </div>
                     <div class="text-right">
-                        <p class="font-extrabold text-gray-900 text-lg">
-                            {{ m.value1 }}
-                        </p>
+                        <p class="font-extrabold text-gray-900 text-lg">{{ m.value1 }}</p>
                         <p class="text-xs font-bold text-gray-400">{{ m.unit }}</p>
                     </div>
                 </div>
                 {% endfor %}
             {% else %}
                 <div class="text-center py-10 bg-white rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-dashed border-gray-200">
-                    <p class="text-gray-400 font-medium">Aucune activité récente</p>
+                    <p class="text-gray-400 font-medium">{{ t('dash_no_activity') }}</p>
                 </div>
             {% endif %}
         </div>

@@ -1,23 +1,20 @@
 {% extends "base.html" %}
 
-{% block title %}Historique{% endblock %}
+{% block title %}{{ t('hist_title') }}{% endblock %}
 
 {% block content %}
 <div class="space-y-6">
-    
+
     <div class="flex items-center justify-between pb-2 border-b border-gray-100">
-        <h1 class="text-2xl font-extrabold text-gray-900">Historique complet</h1>
+        <h1 class="text-2xl font-extrabold text-gray-900">{{ t('hist_title') }}</h1>
         <div class="flex gap-2 relative" id="exportMenuContainer">
-            <button class="p-2 text-gray-400 hover:text-blue-600 transition bg-gray-50 rounded-xl" title="Filtrer">
+            <button class="p-2 text-gray-400 hover:text-blue-600 transition bg-gray-50 rounded-xl" title="{{ t('filter_all') }}">
                 <i data-lucide="filter" class="w-5 h-5"></i>
             </button>
-            
-            <button onclick="toggleExportMenu()" class="p-2 text-gray-400 hover:text-blue-600 transition bg-gray-50 rounded-xl" title="Exporter">
+            <button onclick="toggleExportMenu()" class="p-2 text-gray-400 hover:text-blue-600 transition bg-gray-50 rounded-xl">
                 <i data-lucide="download" class="w-5 h-5"></i>
             </button>
-
-            <!-- Export Dropdown -->
-            <div id="exportDropdown" class="hidden absolute right-0 top-12 w-48 bg-white rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.1)] border border-gray-100 z-50 overflow-hidden transform origin-top-right transition-all">
+            <div id="exportDropdown" class="hidden absolute right-0 top-12 w-48 bg-white rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.1)] border border-gray-100 z-50 overflow-hidden">
                 <div class="p-1.5 space-y-1">
                     <a href="{{ url_for('main.export_pdf') }}" class="flex items-center gap-3 px-4 py-3 text-sm font-bold text-gray-700 hover:bg-gray-50 rounded-xl transition group">
                         <div class="w-8 h-8 rounded-lg bg-red-50 text-red-500 flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -36,34 +33,28 @@
         </div>
     </div>
 
-    <!-- HEALTH TIPS / TRAFFIC LIGHT SYSTEM (CAROUSEL) -->
+    <!-- Health Tips Carousel -->
     {% if health_tips %}
     <div class="relative w-full max-w-2xl mx-auto overflow-hidden rounded-2xl" id="tips-container">
-        <!-- Track -->
         <div class="flex transition-transform duration-700 ease-in-out" id="tips-track">
             {% for tip in health_tips %}
             <div class="w-full flex-shrink-0">
                 <div class="bg-white rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-gray-100 overflow-hidden {{ tip.border_class }} border-l-[6px] h-full mx-1">
                     <div class="p-6">
-                        <!-- Header -->
                         <div class="flex items-center gap-3 mb-4">
                             <div class="w-12 h-12 rounded-full {{ tip.bg_class }} {{ tip.text_class }} flex items-center justify-center shrink-0">
                                 <i data-lucide="{{ tip.icon }}" class="w-6 h-6"></i>
                             </div>
                             <h3 class="font-bold text-xl text-gray-900">{{ tip.title }}</h3>
                         </div>
-                        
-                        <!-- Message -->
                         <p class="{{ tip.text_class }} font-medium text-base mb-5 bg-opacity-10 p-3 rounded-xl {{ tip.bg_class }}">
                             {{ tip.message }}
                         </p>
-                        
-                        <!-- Lists -->
                         {% if tip.to_avoid or tip.to_favor %}
                         <div class="grid grid-cols-2 gap-6 pt-4 border-t border-gray-50">
                             {% if tip.to_avoid %}
                             <div>
-                                <span class="text-[10px] uppercase font-bold text-red-400 tracking-wider mb-2 block">À éviter</span>
+                                <span class="text-[10px] uppercase font-bold text-red-400 tracking-wider mb-2 block">{{ t('hist_avoid') }}</span>
                                 <ul class="space-y-2">
                                     {% for item in tip.to_avoid %}
                                     <li class="flex items-center gap-2 text-sm font-medium text-gray-600">
@@ -73,10 +64,9 @@
                                 </ul>
                             </div>
                             {% endif %}
-                            
                             {% if tip.to_favor %}
                             <div>
-                                <span class="text-[10px] uppercase font-bold text-emerald-400 tracking-wider mb-2 block">À privilégier</span>
+                                <span class="text-[10px] uppercase font-bold text-emerald-400 tracking-wider mb-2 block">{{ t('hist_prefer') }}</span>
                                 <ul class="space-y-2">
                                     {% for item in tip.to_favor %}
                                     <li class="flex items-center gap-2 text-sm font-medium text-gray-600">
@@ -93,12 +83,10 @@
             </div>
             {% endfor %}
         </div>
-        
-        <!-- Indicators -->
         {% if health_tips|length > 1 %}
         <div class="absolute bottom-4 left-0 right-0 flex justify-center gap-2 z-10">
             {% for tip in health_tips %}
-            <button class="w-2 h-2 rounded-full bg-gray-300 transition-all duration-300 hover:bg-gray-400 tip-indicator {% if loop.first %}bg-gray-800 w-6{% endif %}" 
+            <button class="w-2 h-2 rounded-full bg-gray-300 transition-all duration-300 hover:bg-gray-400 tip-indicator {% if loop.first %}bg-gray-800 w-6{% endif %}"
                     onclick="goToSlide({{ loop.index0 }})"></button>
             {% endfor %}
         </div>
@@ -107,79 +95,52 @@
 
     <script>
         function toggleExportMenu() {
-            const menu = document.getElementById('exportDropdown');
-            menu.classList.toggle('hidden');
+            document.getElementById('exportDropdown').classList.toggle('hidden');
         }
-
-        // Close dropdown when clicking outside
-        document.addEventListener('click', function(event) {
-            const container = document.getElementById('exportMenuContainer');
-            const menu = document.getElementById('exportDropdown');
-            if (container && !container.contains(event.target)) {
-                menu.classList.add('hidden');
-            }
+        document.addEventListener('click', function(e) {
+            const c = document.getElementById('exportMenuContainer');
+            const m = document.getElementById('exportDropdown');
+            if (c && !c.contains(e.target)) m.classList.add('hidden');
         });
-
         document.addEventListener("DOMContentLoaded", function() {
             const track = document.getElementById('tips-track');
             const indicators = document.querySelectorAll('.tip-indicator');
             const slideCount = {{ health_tips|length }};
-            let currentIndex = 0;
-            let interval;
+            let currentIndex = 0, interval;
 
             function goToSlide(index) {
                 currentIndex = index;
-                const offset = -currentIndex * 100;
-                track.style.transform = `translateX(${offset}%)`;
-                
-                // Update indicators
+                track.style.transform = `translateX(${-currentIndex * 100}%)`;
                 indicators.forEach((ind, i) => {
-                    if (i === currentIndex) {
-                        ind.classList.remove('bg-gray-300', 'w-2');
-                        ind.classList.add('bg-gray-800', 'w-6');
-                    } else {
-                        ind.classList.add('bg-gray-300', 'w-2');
-                        ind.classList.remove('bg-gray-800', 'w-6');
-                    }
+                    if (i === currentIndex) { ind.classList.remove('bg-gray-300','w-2'); ind.classList.add('bg-gray-800','w-6'); }
+                    else { ind.classList.add('bg-gray-300','w-2'); ind.classList.remove('bg-gray-800','w-6'); }
                 });
             }
-
-            function startAutoSlide() {
-                interval = setInterval(() => {
-                    let nextIndex = (currentIndex + 1) % slideCount;
-                    goToSlide(nextIndex);
-                }, 5000); // 5 seconds
-            }
+            function startAutoSlide() { interval = setInterval(() => goToSlide((currentIndex+1)%slideCount), 5000); }
 
             if (slideCount > 1) {
                 startAutoSlide();
-                
-                // Pause on hover
-                const container = document.getElementById('tips-container');
-                container.addEventListener('mouseenter', () => clearInterval(interval));
-                container.addEventListener('mouseleave', startAutoSlide);
+                const c = document.getElementById('tips-container');
+                c.addEventListener('mouseenter', () => clearInterval(interval));
+                c.addEventListener('mouseleave', startAutoSlide);
             }
         });
     </script>
     {% endif %}
 
-    <!-- Chart Section -->
+    <!-- Chart -->
     {% if measurements %}
     <div class="bg-white p-6 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
         <div class="flex items-center justify-between mb-6">
-            <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wide">Évolution</h3>
-            
-            <!-- Filter Buttons -->
+            <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wide">{{ t('hist_evolution') }}</h3>
             <div class="flex bg-gray-50 rounded-xl p-1 gap-1 overflow-x-auto max-w-[200px] md:max-w-none no-scrollbar">
-                <button onclick="updateChart('all')" id="btn-all" class="px-3 py-1 text-xs font-bold rounded-lg bg-white text-gray-900 shadow-sm transition-all filter-btn whitespace-nowrap">Tous</button>
-                <button onclick="updateChart('tension')" id="btn-tension" class="px-3 py-1 text-xs font-bold rounded-lg text-gray-500 hover:text-gray-900 transition-all filter-btn whitespace-nowrap">Tension</button>
-                <button onclick="updateChart('glycemie')" id="btn-glycemie" class="px-3 py-1 text-xs font-bold rounded-lg text-gray-500 hover:text-gray-900 transition-all filter-btn whitespace-nowrap">Glycémie</button>
-                <button onclick="updateChart('poids')" id="btn-poids" class="px-3 py-1 text-xs font-bold rounded-lg text-gray-500 hover:text-gray-900 transition-all filter-btn whitespace-nowrap">Poids</button>
+                <button onclick="updateChart('all')" id="btn-all" class="px-3 py-1 text-xs font-bold rounded-lg bg-white text-gray-900 shadow-sm transition-all filter-btn whitespace-nowrap">{{ t('filter_all') }}</button>
+                <button onclick="updateChart('tension')" id="btn-tension" class="px-3 py-1 text-xs font-bold rounded-lg text-gray-500 hover:text-gray-900 transition-all filter-btn whitespace-nowrap">{{ t('type_tension') }}</button>
+                <button onclick="updateChart('glycemie')" id="btn-glycemie" class="px-3 py-1 text-xs font-bold rounded-lg text-gray-500 hover:text-gray-900 transition-all filter-btn whitespace-nowrap">{{ t('type_glycemie') }}</button>
+                <button onclick="updateChart('poids')" id="btn-poids" class="px-3 py-1 text-xs font-bold rounded-lg text-gray-500 hover:text-gray-900 transition-all filter-btn whitespace-nowrap">{{ t('type_poids') }}</button>
             </div>
         </div>
-        <div class="h-64 w-full">
-            <canvas id="historyChart"></canvas>
-        </div>
+        <div class="h-64 w-full"><canvas id="historyChart"></canvas></div>
     </div>
     {% endif %}
 
@@ -200,7 +161,7 @@
                         {% endif %}
                     </div>
                     <div>
-                        <h3 class="text-base font-bold text-gray-900 capitalize">{{ m.type }}</h3>
+                        <h3 class="text-base font-bold text-gray-900">{{ tm(m.type) }}</h3>
                         <p class="text-xs font-bold text-gray-400">{{ m.date.strftime('%d %b %Y à %H:%M') }}</p>
                     </div>
                 </div>
@@ -211,7 +172,6 @@
                     <span class="text-xs font-bold text-gray-400 block">{{ m.unit }}</span>
                 </div>
             </div>
-            
             {% if m.notes %}
             <div class="text-xs font-medium text-gray-500 bg-gray-50 p-3 rounded-xl flex items-start gap-2">
                 <i data-lucide="message-square" class="w-4 h-4 mt-0.5 text-gray-400 shrink-0"></i>
@@ -226,10 +186,10 @@
         <div class="w-20 h-20 bg-gray-50 rounded-3xl flex items-center justify-center mb-6 text-gray-300">
             <i data-lucide="clipboard-list" class="w-10 h-10"></i>
         </div>
-        <h3 class="text-xl font-bold text-gray-900">Aucune donnée</h3>
-        <p class="text-gray-500 font-medium mt-2 max-w-xs">Votre historique est vide pour le moment.</p>
+        <h3 class="text-xl font-bold text-gray-900">{{ t('hist_no_data') }}</h3>
+        <p class="text-gray-500 font-medium mt-2 max-w-xs">{{ t('hist_empty') }}</p>
         <a href="{{ url_for('main.select_measurement_method') }}" class="mt-8 px-8 py-3 bg-blue-600 text-white font-bold rounded-2xl shadow-lg shadow-blue-200 hover:bg-blue-700 transition active:scale-95">
-            Ajouter une mesure
+            {{ t('hist_add') }}
         </a>
     </div>
     {% endif %}
@@ -237,14 +197,16 @@
 
 {% if measurements %}
 <script>
-    let historyChart;
-    let rawData = [];
+    // Translated chart dataset labels (server-rendered)
+    var LBL_TENSION  = '{{ t('type_tension') }}';
+    var LBL_GLYCEMIE = '{{ t('type_glycemie') }}';
+    var LBL_POIDS    = '{{ t('type_poids') }}';
+
+    let historyChart, currentFilteredData = null, rawData = [];
 
     document.addEventListener('DOMContentLoaded', function() {
         const ctx = document.getElementById('historyChart').getContext('2d');
         rawData = JSON.parse('{{ chart_data_json|safe }}');
-        
-        // Initialize with 'all' view by default
         initChart(ctx);
         updateChart('all');
     });
@@ -252,164 +214,62 @@
     function initChart(ctx) {
         historyChart = new Chart(ctx, {
             type: 'line',
-            data: {
-                labels: [],
-                datasets: []
-            },
+            data: { labels: [], datasets: [] },
             options: {
-                responsive: true,
-                maintainAspectRatio: false,
+                responsive: true, maintainAspectRatio: false,
                 plugins: {
                     legend: { display: false },
                     tooltip: {
-                        backgroundColor: '#1F2937',
-                        padding: 12,
-                        cornerRadius: 12,
+                        backgroundColor: '#1F2937', padding: 12, cornerRadius: 12,
                         titleFont: { family: 'Nunito', size: 12 },
                         bodyFont: { family: 'Nunito', size: 14, weight: 'bold' },
-                        displayColors: true, // Show color box in tooltip
+                        displayColors: true,
                         callbacks: {
                             label: function(context) {
-                                // Get the raw data object corresponding to this point
-                                // If 'all', context.dataIndex maps to rawData index directly
-                                // If filtered, we need to map differently or store reference
-                                
                                 let val = context.raw;
                                 let label = context.dataset.label + ': ' + val;
-                                
-                                // Try to find the second value (diastolic) for Tension
-                                // We need access to the original object.
-                                // In 'all' mode: rawData[context.dataIndex]
-                                // In filtered mode: currentFilteredData[context.dataIndex]
-                                
                                 const index = context.dataIndex;
                                 const item = currentFilteredData ? currentFilteredData[index] : rawData[index];
-                                
-                                if (item && item.val2 && context.dataset.label === 'Tension') {
-                                    label += '/' + item.val2;
-                                }
-                                
-                                // Add unit
+                                if (item && item.val2 && context.dataset.label === LBL_TENSION) label += '/' + item.val2;
                                 if (item && item.type === 'tension') label += ' mmHg';
                                 else if (item && item.type === 'glycemie') label += ' mg/dL';
                                 else if (item && item.type === 'poids') label += ' kg';
-
                                 return label;
                             }
                         }
                     }
                 },
                 scales: {
-                    x: {
-                        grid: { display: false },
-                        ticks: {
-                            font: { size: 10, family: 'Nunito', weight: 'bold' },
-                            color: '#9CA3AF',
-                            maxTicksLimit: 6
-                        }
-                    },
-                    y: {
-                        grid: { color: '#F3F4F6', borderDash: [5, 5] },
-                        ticks: {
-                            font: { size: 10, family: 'Nunito', weight: 'bold' },
-                            color: '#9CA3AF',
-                            padding: 10
-                        },
-                        beginAtZero: false
-                    }
+                    x: { grid: { display: false }, ticks: { font: { size: 10, family: 'Nunito', weight: 'bold' }, color: '#9CA3AF', maxTicksLimit: 6 } },
+                    y: { grid: { color: '#F3F4F6', borderDash: [5,5] }, ticks: { font: { size: 10, family: 'Nunito', weight: 'bold' }, color: '#9CA3AF', padding: 10 }, beginAtZero: false }
                 },
-                interaction: {
-                    mode: 'index',
-                    intersect: false
-                }
+                interaction: { mode: 'index', intersect: false }
             }
         });
     }
 
-    let currentFilteredData = null;
-
     function updateChart(type) {
-        // Reset datasets
         historyChart.data.datasets = [];
-        
         if (type === 'all') {
-            currentFilteredData = null; // Used rawData direct mapping
+            currentFilteredData = null;
             historyChart.data.labels = rawData.map(d => d.date);
-
-            // Dataset 1: Tension (Red)
-            historyChart.data.datasets.push({
-                label: 'Tension',
-                data: rawData.map(d => d.type === 'tension' ? d.val1 : null),
-                borderColor: '#EF4444',
-                backgroundColor: '#EF4444',
-                borderWidth: 2,
-                pointRadius: 3,
-                spanGaps: true,
-                tension: 0.4
-            });
-
-            // Dataset 2: Glycémie (Blue)
-            historyChart.data.datasets.push({
-                label: 'Glycémie',
-                data: rawData.map(d => d.type === 'glycemie' ? d.val1 : null),
-                borderColor: '#2563EB',
-                backgroundColor: '#2563EB',
-                borderWidth: 2,
-                pointRadius: 3,
-                spanGaps: true,
-                tension: 0.4
-            });
-
-            // Dataset 3: Poids (Green)
-            historyChart.data.datasets.push({
-                label: 'Poids',
-                data: rawData.map(d => d.type === 'poids' ? d.val1 : null),
-                borderColor: '#22C55E',
-                backgroundColor: '#22C55E',
-                borderWidth: 2,
-                pointRadius: 3,
-                spanGaps: true,
-                tension: 0.4
-            });
-
+            historyChart.data.datasets.push({ label: LBL_TENSION,  data: rawData.map(d => d.type==='tension'  ? d.val1 : null), borderColor:'#EF4444', backgroundColor:'#EF4444', borderWidth:2, pointRadius:3, spanGaps:true, tension:0.4 });
+            historyChart.data.datasets.push({ label: LBL_GLYCEMIE, data: rawData.map(d => d.type==='glycemie' ? d.val1 : null), borderColor:'#2563EB', backgroundColor:'#2563EB', borderWidth:2, pointRadius:3, spanGaps:true, tension:0.4 });
+            historyChart.data.datasets.push({ label: LBL_POIDS,    data: rawData.map(d => d.type==='poids'    ? d.val1 : null), borderColor:'#22C55E', backgroundColor:'#22C55E', borderWidth:2, pointRadius:3, spanGaps:true, tension:0.4 });
         } else {
-            // Filter Data for specific type
             const filteredData = rawData.filter(item => item.type === type);
             currentFilteredData = filteredData;
-
             historyChart.data.labels = filteredData.map(d => d.date);
-            
-            let color = '#2563EB'; // Default Blue
-            let label = 'Valeur';
-            if (type === 'tension') { color = '#EF4444'; label = 'Tension'; }
-            if (type === 'glycemie') { color = '#2563EB'; label = 'Glycémie'; }
-            if (type === 'poids') { color = '#22C55E'; label = 'Poids'; }
-
-            historyChart.data.datasets.push({
-                label: label,
-                data: filteredData.map(d => d.val1),
-                borderColor: color,
-                backgroundColor: color + '10', // Low opacity fill
-                pointBorderColor: color,
-                borderWidth: 3,
-                pointRadius: 4,
-                fill: true, // Fill area only for single view
-                tension: 0.4
-            });
+            let color = '#2563EB', label = type;
+            if (type === 'tension')  { color = '#EF4444'; label = LBL_TENSION; }
+            if (type === 'glycemie') { color = '#2563EB'; label = LBL_GLYCEMIE; }
+            if (type === 'poids')    { color = '#22C55E'; label = LBL_POIDS; }
+            historyChart.data.datasets.push({ label, data: filteredData.map(d => d.val1), borderColor: color, backgroundColor: color+'10', pointBorderColor: color, borderWidth:3, pointRadius:4, fill:true, tension:0.4 });
         }
-
         historyChart.update();
-
-        // Update Buttons UI
-        document.querySelectorAll('.filter-btn').forEach(btn => {
-            btn.classList.remove('bg-white', 'text-gray-900', 'shadow-sm');
-            btn.classList.add('text-gray-500');
-        });
+        document.querySelectorAll('.filter-btn').forEach(btn => { btn.classList.remove('bg-white','text-gray-900','shadow-sm'); btn.classList.add('text-gray-500'); });
         const activeBtn = document.getElementById('btn-' + type);
-        if(activeBtn) {
-            activeBtn.classList.add('bg-white', 'text-gray-900', 'shadow-sm');
-            activeBtn.classList.remove('text-gray-500');
-        }
+        if (activeBtn) { activeBtn.classList.add('bg-white','text-gray-900','shadow-sm'); activeBtn.classList.remove('text-gray-500'); }
     }
 </script>
 {% endif %}
