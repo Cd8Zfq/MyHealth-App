@@ -1,24 +1,23 @@
 from flask_wtf import FlaskForm
-from wtforms import FloatField, SelectField, SubmitField, TextAreaField, RadioField
-from wtforms.validators import DataRequired, Optional
+from wtforms import FloatField, SubmitField, TextAreaField, RadioField, StringField
+from wtforms.validators import DataRequired, Optional, NumberRange
+
 
 class MeasurementForm(FlaskForm):
-    type = RadioField('Type de mesure', choices=[
-        ('tension', 'Tension Artérielle (mmHg)'),
-        ('glycemie', 'Glycémie (mg/dL)'),
-        ('poids', 'Poids (kg)')
+    type = RadioField('Measurement type', choices=[
+        ('tension', 'Blood Pressure (mmHg)'),
+        ('glycemie', 'Blood Sugar (mg/dL)'),
+        ('poids', 'Weight (kg)')
     ], validators=[DataRequired()])
-    
-    value1 = FloatField('Valeur 1 (Systolique / Glucose / Poids)', validators=[DataRequired()])
-    value2 = FloatField('Valeur 2 (Diastolique - Tension uniquement)', validators=[Optional()])
-    
-    notes = TextAreaField('Notes', validators=[Optional()])
-    submit = SubmitField('Ajouter une mesure')
 
-from wtforms import StringField, BooleanField
+    value1 = FloatField('Value 1', validators=[DataRequired(), NumberRange(min=0, max=500)])
+    value2 = FloatField('Value 2 (Diastolic)', validators=[Optional(), NumberRange(min=0, max=300)])
+    notes = TextAreaField('Notes', validators=[Optional()])
+    submit = SubmitField('Save')
+
 
 class ReminderForm(FlaskForm):
-    title = StringField('Titre du rappel (ex: Médicament, Glycémie)', validators=[DataRequired()])
-    time = StringField('Heure (HH:MM)', validators=[DataRequired()])
-    days = StringField('Jours (ex: Tous les jours, Lun-Ven)', validators=[Optional()])
-    submit = SubmitField('Enregistrer le rappel')
+    title = StringField('Reminder title', validators=[DataRequired()])
+    time = StringField('Time (HH:MM)', validators=[DataRequired()])
+    days = StringField('Days (optional)', validators=[Optional()])
+    submit = SubmitField('Save reminder')
