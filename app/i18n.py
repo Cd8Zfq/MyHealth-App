@@ -57,7 +57,7 @@ TRANSLATIONS = {
         'doctors_li3':      '<strong>Alertes automatiques</strong> : Soyez notifié des mesures anormales',
         'doctors_cta':      'Créer mon compte médecin',
         'cta_title':        'Prêt à prendre soin de votre santé ?',
-        'cta_desc':         "Rejoignez des milliers d'utilisateurs qui font confiance à MyHealth pour leur suivi médical quotidien.",
+        'cta_desc':         "Rejoignez des milliers d'utilisateurs qui font confiance à SahtekFlbal pour leur suivi médical quotidien.",
         'footer_tagline':       'Votre compagnon santé personnel pour un suivi médical simplifié et sécurisé.',
         'footer_product':       'Produit',
         'footer_features_link': 'Fonctionnalités',
@@ -71,7 +71,7 @@ TRANSLATIONS = {
         'footer_help':          "Centre d'aide",
         'footer_contact':       'Contact',
         'footer_secure':        'Données sécurisées',
-        'footer_copyright':     '© 2024 MyHealth. Tous droits réservés.',
+        'footer_copyright':     '© 2024 SahtekFlbal. Tous droits réservés.',
         # ── lang toggle ────────────────────────────────────────────────
         'lang_label': 'Langue',
         # ── auth ───────────────────────────────────────────────────────
@@ -82,7 +82,7 @@ TRANSLATIONS = {
         'login_no_account': 'Pas encore de compte ?',
         'login_signup':     "S'inscrire",
         'register_heading':      'Créer un compte',
-        'register_subtitle':     'Rejoignez MyHealth gratuitement',
+        'register_subtitle':     'Rejoignez SahtekFlbal gratuitement',
         'register_password':     'Mot de passe',
         'register_btn':          "S'inscrire",
         'register_have_account': 'Déjà un compte ?',
@@ -322,7 +322,7 @@ TRANSLATIONS = {
         'doctors_li3':      '<strong>Automatic alerts</strong>: Be notified of abnormal measurements',
         'doctors_cta':      'Create my doctor account',
         'cta_title':        'Ready to take care of your health?',
-        'cta_desc':         'Join thousands of users who trust MyHealth for their daily medical tracking.',
+        'cta_desc':         'Join thousands of users who trust SahtekFlbal for their daily medical tracking.',
         'footer_tagline':       'Your personal health companion for simplified and secure medical tracking.',
         'footer_product':       'Product',
         'footer_features_link': 'Features',
@@ -336,7 +336,7 @@ TRANSLATIONS = {
         'footer_help':          'Help Center',
         'footer_contact':       'Contact',
         'footer_secure':        'Secured data',
-        'footer_copyright':     '© 2024 MyHealth. All rights reserved.',
+        'footer_copyright':     '© 2024 SahtekFlbal. All rights reserved.',
         # ── lang toggle ────────────────────────────────────────────────
         'lang_label': 'Language',
         # ── auth ───────────────────────────────────────────────────────
@@ -347,7 +347,7 @@ TRANSLATIONS = {
         'login_no_account': 'No account yet?',
         'login_signup':     'Sign up',
         'register_heading':      'Create an account',
-        'register_subtitle':     'Join MyHealth for free',
+        'register_subtitle':     'Join SahtekFlbal for free',
         'register_password':     'Password',
         'register_btn':          'Sign up',
         'register_have_account': 'Already have an account?',

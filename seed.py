@@ -24,11 +24,11 @@ def seed_database():
         print("👨‍⚕️  Création des médecins...")
         doctors = []
 
-        doctor1 = User(email='dr.martin@myhealth.fr', role='doctor')
+        doctor1 = User(email='dr.martin@sahtekflbal.fr', role='doctor')
         doctor1.set_password('password123')
         doctors.append(doctor1)
 
-        doctor2 = User(email='dr.dubois@myhealth.fr', role='doctor')
+        doctor2 = User(email='dr.dubois@sahtekflbal.fr', role='doctor')
         doctor2.set_password('password123')
         doctors.append(doctor2)
 
@@ -276,8 +276,8 @@ def seed_database():
         print("\n✅ Base de données peuplée avec succès !")
         print("\n📋 Comptes créés :")
         print("\n👨‍⚕️ Médecins :")
-        print("   - dr.martin@myhealth.fr / password123")
-        print("   - dr.dubois@myhealth.fr / password123")
+        print("   - dr.martin@sahtekflbal.fr / password123")
+        print("   - dr.dubois@sahtekflbal.fr / password123")
         print("   - isseabdizakaria@gmail.com / password123")
         print("\n👥 Patients :")
         for patient_data in patients_data:

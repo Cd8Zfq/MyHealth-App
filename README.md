@@ -1,4 +1,4 @@
-# MyHealth 🏥
+# SahtekFlbal 🏥
 
 Application web de suivi de santé personnel avec double interface patient/médecin.
 
@@ -33,8 +33,8 @@ Application web de suivi de santé personnel avec double interface patient/méde
 
 1.  **Cloner le dépôt**
     ```bash
-    git clone https://github.com/Cd8Zfq/MyHealth-App.git
-    cd MyHealth
+    git clone https://github.com/Cd8Zfq/SahtekFlbal-App.git
+    cd SahtekFlbal
     ```
 
     > **Note Windows** : Utilisez Git Bash, PowerShell ou CMD pour exécuter ces commandes.
@@ -134,7 +134,7 @@ Application web de suivi de santé personnel avec double interface patient/méde
 ## 🏗️ Structure du Projet
 
 ```
-MyHealth/
+SahtekFlbal/
 ├── app/
 │   ├── __init__.py              # Initialisation Flask & extensions
 │   ├── forms.py                 # Formulaires Flask-WTF
